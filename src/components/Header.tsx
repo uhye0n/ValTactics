@@ -1,4 +1,12 @@
+import { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { AuthModal } from './auth/AuthModal';
+import { UserMenu } from './auth/UserMenu';
+
 export function Header() {
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const { isAuthenticated } = useAuth();
+
   return (
     <header className="header">
       <div className="header__container">
@@ -16,13 +24,14 @@ export function Header() {
             <div className="text-underline__accent text-underline__accent--left"></div>
             <div className="text-underline__accent text-underline__accent--right"></div>
           </div>
-        </div>
-        
-        <div className="header__auth">
-          <div className="auth-container">
-            <button className="auth-button">
-              로그인
-            </button>
+        </div>        <div className="header__auth">
+          <div className="auth-container">            {isAuthenticated ? (
+              <UserMenu />
+            ) : (
+              <button className="auth-button" onClick={() => setIsAuthModalOpen(true)}>
+                로그인
+              </button>
+            )}
             <div className="text-underline text-underline--auth">
               <div className="text-underline__main"></div>
               <div className="text-underline__accent text-underline__accent--left"></div>
@@ -31,6 +40,11 @@ export function Header() {
           </div>
         </div>
       </div>
+
+      <AuthModal 
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+      />
     </header>
   );
 }
