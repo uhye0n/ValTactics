@@ -18,11 +18,10 @@ export function Panel({ id, label, isHighlighted = false, position, onClick }: P
 
   return (
     <div 
-      className="panel-item"
-      style={{
+      className="panel-item"      style={{
         position: 'absolute',
         top: position.top,
-        left: position.left || 'calc(12.5vw - 55px)', // 현재 위치의 절반만큼 더 왼쪽
+        left: position.left || 'var(--panel-left-position)', // CSS 변수 사용
         transform: 'translateY(-50%)',
       }}
       data-panel-id={id}

@@ -138,7 +138,7 @@ body {
 
 .text-underline {
   position: relative;
-  margin-top: 8px;
+  margin-top: 12px;
 }
 
 .text-underline--logo {
@@ -148,7 +148,7 @@ body {
 .text-underline--auth {
   width: 60px;
   position: absolute;
-  bottom: 2px;
+  bottom: -2px;
   left: 50%;
   transform: translateX(-50%);
 }
@@ -865,4 +865,25 @@ body {
 .auth-modal__close-button svg {
   width: 20px;
   height: 20px;
+}
+
+/* Responsive Design - Fixed layout for small screens */
+@media (max-width: 1199px), (max-height: 1199px) {
+  :root {
+    --panel-left-position: 95px; /* 고정된 위치 (1200px * 12.5% - 55px = 95px) */
+    --scenario-card-height: 264px; /* 고정된 높이 */
+  }
+  
+  body {
+    overflow-x: auto;
+    overflow-y: auto;
+  }
+  
+  .app, .app__background {
+    min-width: 1200px;
+  }
+  
+  .popular-scenarios__container {
+    min-width: 580px;
+  }
 }
