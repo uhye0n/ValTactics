@@ -357,6 +357,57 @@
       display: block;
     }
   }
+
+  /* 추가 반응형 미디어 쿼리 */
+  @media (max-width: 1600px) {
+    :root {
+      --panel-left-position: calc(8vw - 40px);
+    }
+  }
+
+  @media (max-width: 1400px) {
+    :root {
+      --panel-left-position: calc(6vw - 30px);
+      --panel-font-size: 32px;
+      --panel-font-size-highlighted: 44px;
+    }
+    
+    .popular-scenarios {
+      transform: translateY(-50%) scale(0.9);
+    }
+  }
+
+  @media (max-width: 1200px) {
+    :root {
+      --panel-left-position: calc(4vw - 20px);
+      --panel-font-size: 28px;
+      --panel-font-size-highlighted: 38px;
+    }
+    
+    .popular-scenarios {
+      display: none;
+    }
+  }
+
+  @media (max-width: 992px) {
+    :root {
+      --panel-left-position: 2rem;
+      --panel-font-size: 24px;
+      --panel-font-size-highlighted: 32px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    :root {
+      --panel-left-position: 1rem;
+      --panel-font-size: 20px;
+      --panel-font-size-highlighted: 28px;
+    }
+    
+    .header__container {
+      @apply px-4 py-8;
+    }
+  }
 }
 
 @layer base {
