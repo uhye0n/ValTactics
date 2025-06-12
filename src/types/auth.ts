@@ -38,11 +38,19 @@ export interface RegisterFormData {
   agreeToTerms: boolean;
 }
 
+export interface ProfileUpdateData {
+  username?: string;
+  avatar?: string;
+  rank?: string;
+  level?: number;
+}
+
 export interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   login: (data: LoginFormData) => Promise<void>;
   register: (data: RegisterFormData) => Promise<void>;
   logout: () => void;
+  updateProfile: (data: ProfileUpdateData) => Promise<void>;
   isAuthenticated: boolean;
 }

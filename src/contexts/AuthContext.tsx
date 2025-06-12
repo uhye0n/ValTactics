@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import type { User, LoginFormData, RegisterFormData, AuthContextType } from '../types/auth';
+import type { User, LoginFormData, RegisterFormData, ProfileUpdateData, AuthContextType } from '../types/auth';
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -120,12 +120,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(false);
     }
   }, []);
-
   const logout = useCallback(() => {
     setUser(null);
     localStorage.removeItem('user');
     sessionStorage.removeItem('user');
   }, []);
+
+  const updateProfile = useCallback(async (data: ProfileUpdateData) => {
+    setIsLoading(true);
+    
+    try {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      if (!user) {
+        throw new Error('로그인이 필요합니다.');
+      }
+
+      const updatedUser = {
+        ...user,
+        ...data,
+        lastLoginAt: new Date()
+      };
+
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+    } catch (error) {
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user]);
 
   // 앱 시작 시 로컬 스토리지에서 사용자 정보 복원
   useEffect(() => {
@@ -139,13 +163,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     }
   }, []);
-
   const value: AuthContextType = {
     user,
     isLoading,
     login,
     register,
     logout,
+    updateProfile,
     isAuthenticated: !!user
   };
 

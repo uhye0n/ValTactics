@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { ProfileEditModal } from './ProfileEditModal';
 
 interface UserMenuProps {
   onClose?: () => void;
@@ -8,6 +9,7 @@ interface UserMenuProps {
 export function UserMenu({ onClose }: UserMenuProps) {
   const { user, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+  const [isProfileEditOpen, setIsProfileEditOpen] = useState(false);
 
   if (!user) return null;
 
@@ -85,7 +87,14 @@ export function UserMenu({ onClose }: UserMenuProps) {
             </div>
 
             <div className="user-menu__divider" />            <div className="user-menu__items">
-              <button className="user-menu__item" type="button">
+              <button 
+                className="user-menu__item" 
+                type="button"
+                onClick={() => {
+                  setIsProfileEditOpen(true);
+                  setIsOpen(false);
+                }}
+              >
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                   <path d="M8 8C10.2091 8 12 6.20914 12 4C12 1.79086 10.2091 0 8 0C5.79086 0 4 1.79086 4 4C4 6.20914 5.79086 8 8 8Z" fill="currentColor"/>
                   <path d="M8 10C3.58172 10 0 13.5817 0 18H16C16 13.5817 12.4183 10 8 10Z" fill="currentColor"/>
@@ -108,10 +117,14 @@ export function UserMenu({ onClose }: UserMenuProps) {
                 </svg>
                 로그아웃
               </button>
-            </div>
-          </div>
+            </div>          </div>
         </>
       )}
+      
+      <ProfileEditModal 
+        isOpen={isProfileEditOpen}
+        onClose={() => setIsProfileEditOpen(false)}
+      />
     </div>
   );
 }
