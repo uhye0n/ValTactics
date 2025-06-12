@@ -65,6 +65,7 @@ body {
   align-items: center;
   padding: 3rem 4rem;
   min-width: 1400px; /* 최소 가로 크기 증가 */
+  height: auto; /* 일정한 높이 유지 */
 }
 
 .header__spacer {
@@ -107,7 +108,7 @@ body {
   display: flex;
   justify-content: flex-end;
   flex: 1;
-  align-items: flex-start;
+  align-items: center; /* flex-start에서 center로 변경 */
   min-width: 200px; /* 로그인 영역 최소 크기 보장 */
 }
 
@@ -115,8 +116,8 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-height: 48px;
-  justify-content: flex-start;
+  min-height: 80px; /* 고정된 높이로 일관성 확보 */
+  justify-content: center; /* flex-start에서 center로 변경 */
   position: relative;
 }
 
@@ -146,7 +147,7 @@ body {
 
 .text-underline {
   position: relative;
-  margin-top: 12px;
+  margin-top: 8px; /* 12px에서 8px로 줄임 */
 }
 
 .text-underline--logo {
@@ -155,10 +156,9 @@ body {
 
 .text-underline--auth {
   width: 60px;
-  position: absolute;
-  bottom: -2px;
-  left: 50%;
-  transform: translateX(-50%);
+  position: relative; /* absolute에서 relative로 변경 */
+  margin-top: 4px; /* 8px에서 4px로 줄임 */
+  /* bottom, left, transform 속성 제거 */
 }
 
 .text-underline__main {
@@ -647,6 +647,9 @@ body {
 .user-menu {
   position: relative;
   display: inline-block;
+  min-height: 48px; /* 로그인 버튼과 동일한 높이 */
+  display: flex;
+  align-items: center;
 }
 
 .user-menu__trigger {

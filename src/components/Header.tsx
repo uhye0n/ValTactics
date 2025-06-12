@@ -7,13 +7,18 @@ export function Header() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const { isAuthenticated } = useAuth();
 
+  const handleLogoClick = () => {
+    // 메인 페이지로 이동 (현재 페이지 새로고침)
+    window.location.reload();
+  };
+
   return (
     <header className="header">
       <div className="header__container">
         <div className="header__spacer"></div>
         
         <div className="header__logo">
-          <h1 className="logo">
+          <h1 className="logo" onClick={handleLogoClick}>
             <span className="logo__highlight">V</span>
             <span className="logo__text">a</span>
             <span className="logo__highlight">l</span>
@@ -25,7 +30,8 @@ export function Header() {
             <div className="text-underline__accent text-underline__accent--right"></div>
           </div>
         </div>        <div className="header__auth">
-          <div className="auth-container">            {isAuthenticated ? (
+          <div className="auth-container">
+            {isAuthenticated ? (
               <UserMenu />
             ) : (
               <button className="auth-button" onClick={() => setIsAuthModalOpen(true)}>
