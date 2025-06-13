@@ -1264,6 +1264,7 @@ body {
   font-size: 18px;
   letter-spacing: 3.6px;
   white-space: nowrap;
+  margin-left: 8px; /* 도형과 메인화면 사이의 거리를 벌리기 위해 추가 */
 }
 
 /* Responsive Design - Fixed layout for small screens */
