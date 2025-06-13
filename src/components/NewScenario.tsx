@@ -1,5 +1,3 @@
-import { useNavigate } from "react-router-dom";
-import svgPaths from "./NewScenario/svg-paths";
 import "./NewScenario/NewScenario.css";
 
 // Import placeholder images - replace with actual paths when available
@@ -58,50 +56,6 @@ function UnderlineWithHighlights({ width = 909, className = "" }: { width?: numb
         <line stroke="rgba(255, 255, 255, 0.6)" x1={width - 11.88} x2={width} y1="0.5" y2="0.5" />
       </svg>
     </div>
-  );
-}
-
-// Navigation breadcrumb component
-function NavigationBreadcrumb() {
-  const navigate = useNavigate();
-
-  const handleBackClick = () => {
-    navigate('/');
-  };
-
-  return (
-    <section className="section-container header-spacing">
-      <div className="content-width">
-        <div className="navigation-header">
-          {/* Left Navigation */}
-          <div className="nav-left">
-            <div className="nav-back-button" onClick={handleBackClick} style={{ cursor: 'pointer' }}>
-              <div className="nav-back-icon">
-                <svg
-                  className="underline-svg"
-                  fill="none"
-                  preserveAspectRatio="none"
-                  viewBox="0 0 26 32"
-                >
-                  <path d="M16 1L1 16" stroke="white" strokeLinecap="round" strokeWidth="2" />
-                  <path d="M16 31L1 16" stroke="white" strokeLinecap="round" strokeWidth="2" />
-                  <path d={svgPaths.p3432f100} fill="#393C40" fillOpacity="0.8" />
-                  <circle cx="12" cy="16" fill="white" r="2" />
-                </svg>
-              </div>
-              <span className="nav-back-text">뒤로가기</span>
-            </div>
-            
-            <div className="nav-breadcrumb">
-              <div className="nav-breadcrumb-arrow" />
-              <div className="nav-breadcrumb-arrow" />
-            </div>
-            
-            <span className="nav-main-text">메인화면</span>
-          </div>
-        </div>
-      </div>
-    </section>
   );
 }
 
@@ -315,7 +269,6 @@ export default function NewScenario() {
       
       {/* Content */}
       <div className="new-scenario-content">
-        <NavigationBreadcrumb />
         <MapSelection />
         <AgentSection title="우리 팀 요원" teamType="our" />
         <AgentSection title="상대 팀 요원" teamType="enemy" />

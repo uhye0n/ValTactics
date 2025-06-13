@@ -77,8 +77,11 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   position: relative;
-  min-width: 200px; /* 로고 최소 크기 보장 */
+  min-width: 200px;
+  min-height: 80px;
+  padding: 16px 0; /* 상하 패딩 추가 */
 }
 
 .logo {
@@ -89,6 +92,7 @@ body {
   cursor: pointer;
   transition: all 0.3s ease;
   margin: 0;
+  margin-bottom: 0; /* 하단 마진 제거 */
 }
 
 .logo:hover {
@@ -117,7 +121,7 @@ body {
   flex-direction: column;
   align-items: center;
   min-height: 80px; /* 고정된 높이로 일관성 확보 */
-  justify-content: center; /* flex-start에서 center로 변경 */
+  justify-content: center; /* 다시 center로 변경 */
   position: relative;
 }
 
@@ -147,18 +151,18 @@ body {
 
 .text-underline {
   position: relative;
-  margin-top: 8px; /* 12px에서 8px로 줄임 */
+  /* margin-top 제거 - 각 클래스에서 개별 설정 */
 }
 
 .text-underline--logo {
   width: 150px;
+  margin-top: 12px; /* 8px에서 12px로 증가 */
 }
 
 .text-underline--auth {
   width: 60px;
-  position: relative; /* absolute에서 relative로 변경 */
-  margin-top: 4px; /* 8px에서 4px로 줄임 */
-  /* bottom, left, transform 속성 제거 */
+  position: relative;
+  margin-top: 0px; /* 2px에서 0px로 변경 (2px 더 위로 올림) */
 }
 
 .text-underline__main {
@@ -1181,6 +1185,85 @@ body {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
+}
+
+/* Header back navigation styles */
+.header__back {
+  display: flex;
+  justify-content: flex-start;
+  flex: 1;
+  align-items: center;
+  min-width: 200px;
+}
+
+.back-nav-container {
+  display: flex;
+  align-items: center;
+  gap: 6px; /* 12px에서 6px로 줄임 */
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.back-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateX(-2px);
+}
+
+.back-icon {
+  width: 24px;
+  height: 32px;
+}
+
+.back-text {
+  font-family: 'Akshar', sans-serif;
+  font-weight: 500;
+  color: #797d7c;
+  font-size: 15px;
+  white-space: nowrap;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0px; /* 8px에서 0px로 완전히 제거 */
+  margin-left: -4px; /* 왼쪽으로 이동 */
+}
+
+.breadcrumb-arrow {
+  width: 12px; /* 8px에서 12px로 원래 크기로 복원 */
+  height: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 -2px; /* 음수 마진으로 겹치게 만들기 */
+  padding: 0; /* 패딩도 제거 */
+}
+
+.breadcrumb-arrow::before {
+  content: '';
+  width: 16px;
+  height: 0;
+  border-top: 2px solid white;
+  transform: rotate(111deg);
+}
+
+.breadcrumb-text {
+  font-family: 'Akshar', sans-serif;
+  font-weight: bold;
+  color: white;
+  font-size: 18px;
+  letter-spacing: 3.6px;
+  white-space: nowrap;
 }
 
 /* Responsive Design - Fixed layout for small screens */

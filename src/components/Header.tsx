@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { AuthModal } from './auth/AuthModal';
 import { UserMenu } from './auth/UserMenu';
@@ -6,16 +7,52 @@ import { UserMenu } from './auth/UserMenu';
 export function Header() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogoClick = () => {
-    // 메인 페이지로 이동 (현재 페이지 새로고침)
-    window.location.reload();
+    navigate('/');
   };
+
+  const handleBackClick = () => {
+    navigate('/');
+  };
+
+  const isNewScenarioPage = location.pathname === '/new-scenario';
 
   return (
     <header className="header">
       <div className="header__container">
-        <div className="header__spacer"></div>
+        {isNewScenarioPage ? (
+          <div className="header__back">
+            <div className="back-nav-container">
+              <button className="back-button" onClick={handleBackClick}>
+                <div className="back-icon">
+                  <svg
+                    width="26"
+                    height="32"
+                    fill="none"
+                    preserveAspectRatio="none"
+                    viewBox="0 0 26 32"
+                  >
+                    <path d="M16 1L1 16" stroke="white" strokeLinecap="round" strokeWidth="2" />
+                    <path d="M16 31L1 16" stroke="white" strokeLinecap="round" strokeWidth="2" />
+                    <circle cx="12" cy="16" fill="white" r="2" />
+                  </svg>
+                </div>
+                <span className="back-text">뒤로가기</span>
+              </button>
+              
+              <div className="breadcrumb">
+                <div className="breadcrumb-arrow" />
+                <div className="breadcrumb-arrow" />
+                <span className="breadcrumb-text">메인화면</span>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="header__spacer"></div>
+        )}
         
         <div className="header__logo">
           <h1 className="logo" onClick={handleLogoClick}>

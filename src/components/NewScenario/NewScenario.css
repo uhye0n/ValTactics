@@ -46,92 +46,6 @@ html, body {
   min-height: calc(100vh + 1000px); /* 충분한 높이 확보로 스크롤 가능하게 */
 }
 
-/* Layout utilities */
-.section-container {
-  width: 100%;
-  padding: 64px 0;
-}
-
-.section-container.header-spacing {
-  padding: 32px 0;
-}
-
-.section-container.compact-spacing {
-  padding: 32px 0;
-}
-
-.content-width {
-  width: 909px;
-  margin: 0 auto;
-}
-
-/* Navigation breadcrumb - simplified layout */
-.navigation-header {
-  position: relative;
-  height: 48px;
-  margin-bottom: 16px;
-}
-
-.nav-left {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.nav-back-button {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.nav-back-icon {
-  width: 24px;
-  height: 32px;
-}
-
-.nav-back-text {
-  font-family: 'Akshar', sans-serif;
-  font-weight: 500;
-  color: #797d7c;
-  font-size: 15px;
-  white-space: nowrap;
-}
-
-.nav-breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.nav-breadcrumb-arrow {
-  width: 12px;
-  height: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.nav-breadcrumb-arrow::before {
-  content: '';
-  width: 16px;
-  height: 0;
-  border-top: 2px solid white;
-  transform: rotate(111deg);
-}
-
-.nav-main-text {
-  font-family: 'Akshar', sans-serif;
-  font-weight: bold;
-  color: white;
-  font-size: 18px;
-  letter-spacing: 3.6px;
-  white-space: nowrap;
-}
-
 /* Underline component */
 .underline-with-highlights {
   position: relative;
@@ -371,6 +285,25 @@ html, body {
 .generate-button-corner.top-right { top: 0; right: 0; }
 .generate-button-corner.bottom-left { bottom: 0; left: 0; }
 .generate-button-corner.bottom-right { bottom: 0; right: 0; }
+
+/* Layout utilities */
+.section-container {
+  width: 100%;
+  padding: 64px 0;
+}
+
+.section-container.header-spacing {
+  padding: 32px 0;
+}
+
+.section-container.compact-spacing {
+  padding: 32px 0;
+}
+
+.content-width {
+  width: 909px;
+  margin: 0 auto;
+}
 
 /* Responsive adjustments */
 @media (max-width: 1024px) {
