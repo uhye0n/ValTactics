@@ -32,7 +32,22 @@ export default function App() {
               </div>
             }
           />
-          <Route path="/new-scenario" element={<NewScenario />} />
+          <Route path="/new-scenario" element={
+            <div className="app">
+              <div
+                className="app__background"
+                style={{
+                  backgroundImage: `url(${backgroundImage})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                }}
+              >
+                <Header />
+                <NewScenario />
+              </div>
+            </div>
+          } />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

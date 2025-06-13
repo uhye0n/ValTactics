@@ -1,13 +1,32 @@
 /* NewScenario.css - Tailwind styles converted to CSS */
 
-.new-scenario {
-  background-color: #0e0f10;
-  position: relative;
+/* Global scroll behavior for new scenario page */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  scroll-behavior: smooth;
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+  height: auto !important;
   min-height: 100vh;
 }
 
+#root {
+  height: auto !important;
+  min-height: 100vh;
+}
+
+.new-scenario {
+  position: relative;
+  width: 100%;
+  min-height: 200vh; /* 강제로 높은 높이 설정 */
+  /* 배경색은 app__background에서 처리하므로 제거 */
+}
+
 .new-scenario-background {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   right: 0;
@@ -15,11 +34,16 @@
   background-repeat: no-repeat;
   background-size: 103.45% 116.38%;
   background-position: 0% 46.05%;
+  z-index: 1;
+  pointer-events: none; /* 배경이 스크롤을 방해하지 않도록 */
 }
 
 .new-scenario-content {
   position: relative;
   z-index: 10;
+  padding-top: 140px; /* 헤더 높이만큼 상단 패딩 추가 */
+  padding-bottom: 60px; /* 하단 여백 추가 */
+  min-height: calc(100vh + 1000px); /* 충분한 높이 확보로 스크롤 가능하게 */
 }
 
 /* Layout utilities */
@@ -41,10 +65,11 @@
   margin: 0 auto;
 }
 
-/* Navigation Header */
+/* Navigation breadcrumb - simplified layout */
 .navigation-header {
   position: relative;
-  height: 64px;
+  height: 48px;
+  margin-bottom: 16px;
 }
 
 .nav-left {
@@ -99,46 +124,6 @@
 }
 
 .nav-main-text {
-  font-family: 'Akshar', sans-serif;
-  font-weight: bold;
-  color: white;
-  font-size: 18px;
-  letter-spacing: 3.6px;
-  white-space: nowrap;
-}
-
-.nav-center {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.nav-logo {
-  font-family: 'Gajraj One', sans-serif;
-  color: white;
-  font-size: 30px;
-  white-space: nowrap;
-}
-
-.nav-logo .highlight {
-  color: #fc4754;
-}
-
-.nav-right {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-}
-
-.nav-login-text {
   font-family: 'Akshar', sans-serif;
   font-weight: bold;
   color: white;
@@ -406,6 +391,10 @@
     flex-direction: column;
     align-items: center;
   }
+  
+  .new-scenario-content {
+    padding-top: 100px; /* 작은 화면에서 헤더 높이 조정 */
+  }
 }
 
 @media (max-width: 768px) {
@@ -422,14 +411,12 @@
     padding: 16px 0;
   }
   
-  .nav-left, .nav-right {
+  .nav-left {
     position: relative;
     transform: none;
   }
   
-  .nav-center {
-    position: relative;
-    transform: none;
-    margin: 16px 0;
+  .new-scenario-content {
+    padding-top: 80px; /* 모바일에서 더 작은 헤더 높이 */
   }
 }

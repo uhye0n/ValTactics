@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import { Header } from "./Header";
 import svgPaths from "./NewScenario/svg-paths";
 import "./NewScenario/NewScenario.css";
 
@@ -62,8 +61,8 @@ function UnderlineWithHighlights({ width = 909, className = "" }: { width?: numb
   );
 }
 
-// Navigation Header Component
-function NavigationHeader() {
+// Navigation breadcrumb component
+function NavigationBreadcrumb() {
   const navigate = useNavigate();
 
   const handleBackClick = () => {
@@ -99,20 +98,6 @@ function NavigationHeader() {
             </div>
             
             <span className="nav-main-text">메인화면</span>
-          </div>
-
-          {/* Center Logo */}
-          <div className="nav-center">
-            <div className="nav-logo">
-              <span className="highlight">V</span>a<span className="highlight">l</span>Tactics
-            </div>
-            <UnderlineWithHighlights width={168} />
-          </div>
-
-          {/* Right Login */}
-          <div className="nav-right">
-            <span className="nav-login-text">로그인</span>
-            <UnderlineWithHighlights width={57} />
           </div>
         </div>
       </div>
@@ -330,7 +315,7 @@ export default function NewScenario() {
       
       {/* Content */}
       <div className="new-scenario-content">
-        <NavigationHeader />
+        <NavigationBreadcrumb />
         <MapSelection />
         <AgentSection title="우리 팀 요원" teamType="our" />
         <AgentSection title="상대 팀 요원" teamType="enemy" />
