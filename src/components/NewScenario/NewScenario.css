@@ -21,6 +21,7 @@ html, body {
 .new-scenario {
   position: relative;
   width: 100%;
+  min-width: 1400px; /* 메인 화면과 동일한 최소 가로 크기 설정 */
   min-height: 200vh; /* 강제로 높은 높이 설정 */
   /* 배경색은 app__background에서 처리하므로 제거 */
 }
@@ -74,13 +75,17 @@ html, body {
 /* Map Selection */
 .map-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: repeat(2, 1fr);
   gap: 16px;
   margin-bottom: 24px;
+  justify-items: center;
+  align-items: center;
 }
 
 .map-card {
   position: relative;
+  width: 140px;
   height: 80px;
   border-radius: 8px;
   overflow: hidden;
@@ -95,6 +100,51 @@ html, body {
   bottom: 0;
   background-size: cover;
   background-position: center;
+}
+
+/* Individual map background images from view folder */
+.map-card[data-map="ascent"] .map-card-background {
+  background-image: url('/resources/images/view/Ascent_view.webp');
+}
+
+.map-card[data-map="bind"] .map-card-background {
+  background-image: url('/resources/images/view/Bind_view.webp');
+}
+
+.map-card[data-map="breeze"] .map-card-background {
+  background-image: url('/resources/images/view/Breeze_view.webp');
+}
+
+.map-card[data-map="fracture"] .map-card-background {
+  background-image: url('/resources/images/view/Fracture_view.webp');
+}
+
+.map-card[data-map="haven"] .map-card-background {
+  background-image: url('/resources/images/view/Haven_view.webp');
+}
+
+.map-card[data-map="split"] .map-card-background {
+  background-image: url('/resources/images/view/Split_view.webp');
+}
+
+.map-card[data-map="sunset"] .map-card-background {
+  background-image: url('/resources/images/view/Sunset_view.webp');
+}
+
+.map-card[data-map="pearl"] .map-card-background {
+  background-image: url('/resources/images/view/Pearl_view.webp');
+}
+
+.map-card[data-map="lotus"] .map-card-background {
+  background-image: url('/resources/images/view/Lotus_view.webp');
+}
+
+.map-card[data-map="icebox"] .map-card-background {
+  background-image: url('/resources/images/view/Icebox_view.webp');
+}
+
+.map-card[data-map="abyss"] .map-card-background {
+  background-image: url('/resources/images/view/Abyss_view.webp');
 }
 
 .map-card-overlay {
@@ -301,55 +351,7 @@ html, body {
 }
 
 .content-width {
-  width: 909px;
+  width: 920px;
   margin: 0 auto;
-}
-
-/* Responsive adjustments */
-@media (max-width: 1024px) {
-  .content-width {
-    width: 90%;
-    max-width: 909px;
-  }
-  
-  .map-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-  
-  .agent-grid {
-    grid-template-columns: repeat(8, 1fr);
-  }
-  
-  .template-grid {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .new-scenario-content {
-    padding-top: 100px; /* 작은 화면에서 헤더 높이 조정 */
-  }
-}
-
-@media (max-width: 768px) {
-  .map-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .agent-grid {
-    grid-template-columns: repeat(6, 1fr);
-  }
-  
-  .navigation-header {
-    height: auto;
-    padding: 16px 0;
-  }
-  
-  .nav-left {
-    position: relative;
-    transform: none;
-  }
-  
-  .new-scenario-content {
-    padding-top: 80px; /* 모바일에서 더 작은 헤더 높이 */
-  }
+  padding: 0 2rem; /* 좌우 여백 추가 */
 }

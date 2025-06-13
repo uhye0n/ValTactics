@@ -23,26 +23,11 @@ const agentImages = {
   sage: "/resources/images/agent/Sage.png",
   skye: "/resources/images/agent/Skye.png",
   sova: "/resources/images/agent/Sova.png",
-  viper: "/resources/images/agent/Viper.png",
-  yoru: "/resources/images/agent/Yoru.png",
-};
-
-// Map images - update paths when actual images are available
-const mapImages = {
-  ascent: "/resources/images/map/Ascent.jpg",
-  bind: "/resources/images/map/Bind.jpg",
-  breeze: "/resources/images/map/Breeze.jpg",
-  fracture: "/resources/images/map/Fracture.jpg",
-  haven: "/resources/images/map/Haven.jpg",
-  icebox: "/resources/images/map/Icebox.jpg",
-  lotus: "/resources/images/map/Lotus.jpg",
-  pearl: "/resources/images/map/Pearl.jpg",
-  split: "/resources/images/map/Split.jpg",
-  sunset: "/resources/images/map/Sunset.jpg",
+  viper: "/resources/images/agent/Viper.png",  yoru: "/resources/images/agent/Yoru.png",
 };
 
 // Shared underline component
-function UnderlineWithHighlights({ width = 909, className = "" }: { width?: number; className?: string }) {
+function UnderlineWithHighlights({ width = 920, className = "" }: { width?: number; className?: string }) {
   return (
     <div className={`underline-with-highlights ${className}`} style={{ width: `${width}px` }}>
       <svg
@@ -60,13 +45,11 @@ function UnderlineWithHighlights({ width = 909, className = "" }: { width?: numb
 }
 
 // Map Selection Component
-function MapCard({ image, name }: { image: string; name: string }) {
+function MapCard({ name }: { name: string }) {
+  const mapKey = name.toLowerCase();
   return (
-    <div className="map-card">
-      <div
-        className="map-card-background"
-        style={{ backgroundImage: `url('${image}')` }}
-      />
+    <div className="map-card" data-map={mapKey}>
+      <div className="map-card-background" />
       <div className="map-card-overlay">
         <span className="map-card-name">{name}</span>
       </div>
@@ -76,16 +59,17 @@ function MapCard({ image, name }: { image: string; name: string }) {
 
 function MapSelection() {
   const maps = [
-    { image: mapImages.ascent, name: "ASCENT" },
-    { image: mapImages.bind, name: "BIND" },
-    { image: mapImages.breeze, name: "BREEZE" },
-    { image: mapImages.fracture, name: "FRACTURE" },
-    { image: mapImages.haven, name: "HAVEN" },
-    { image: mapImages.split, name: "SPLIT" },
-    { image: mapImages.sunset, name: "SUNSET" },
-    { image: mapImages.pearl, name: "PEARL" },
-    { image: mapImages.lotus, name: "LOTUS" },
-    { image: mapImages.icebox, name: "ICEBOX" },
+    { name: "ASCENT" },
+    { name: "BIND" },
+    { name: "BREEZE" },
+    { name: "FRACTURE" },
+    { name: "HAVEN" },
+    { name: "SPLIT" },
+    { name: "SUNSET" },
+    { name: "PEARL" },
+    { name: "LOTUS" },
+    { name: "ICEBOX" },
+    { name: "ABYSS" },
   ];
 
   return (
@@ -98,7 +82,7 @@ function MapSelection() {
         
         <div className="map-grid">
           {maps.map((map) => (
-            <MapCard key={map.name} image={map.image} name={map.name} />
+            <MapCard key={map.name} name={map.name} />
           ))}
         </div>
         
