@@ -72,11 +72,27 @@ html, body {
 }
 
 /* Map Selection */
-.map-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
+.map-grid-container {
+  display: flex;
+  flex-direction: column;
   gap: 16px;
   margin-bottom: 24px;
+  max-width: 100%;
+}
+
+.map-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.map-grid-top {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.map-grid-bottom {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  /* 5개 카드가 6개 카드와 동일한 전체 너비를 차지하도록 조정 */
+  padding: 0 calc((100% / 6) * 0.5);
 }
 
 .map-card {
@@ -85,6 +101,8 @@ html, body {
   border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
+  width: 100%;
+  min-width: 0; /* flex-shrink를 허용 */
 }
 
 .map-card-background {

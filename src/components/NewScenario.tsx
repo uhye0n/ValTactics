@@ -27,18 +27,19 @@ const agentImages = {
   yoru: "/resources/images/agent/Yoru.png",
 };
 
-// Map images - update paths when actual images are available
+// Map images - using view images from resources
 const mapImages = {
-  ascent: "/resources/images/map/Ascent.jpg",
-  bind: "/resources/images/map/Bind.jpg",
-  breeze: "/resources/images/map/Breeze.jpg",
-  fracture: "/resources/images/map/Fracture.jpg",
-  haven: "/resources/images/map/Haven.jpg",
-  icebox: "/resources/images/map/Icebox.jpg",
-  lotus: "/resources/images/map/Lotus.jpg",
-  pearl: "/resources/images/map/Pearl.jpg",
-  split: "/resources/images/map/Split.jpg",
-  sunset: "/resources/images/map/Sunset.jpg",
+  abyss: "/resources/images/view/Abyss_view.webp",
+  ascent: "/resources/images/view/Ascent_view.webp",
+  bind: "/resources/images/view/Bind_view.webp",
+  breeze: "/resources/images/view/Breeze_view.webp",
+  fracture: "/resources/images/view/Fracture_view.webp",
+  haven: "/resources/images/view/Haven_view.webp",
+  icebox: "/resources/images/view/Icebox_view.webp",
+  lotus: "/resources/images/view/Lotus_view.webp",
+  pearl: "/resources/images/view/Pearl_view.webp",
+  split: "/resources/images/view/Split_view.webp",
+  sunset: "/resources/images/view/Sunset_view.webp",
 };
 
 // Shared underline component
@@ -76,16 +77,17 @@ function MapCard({ image, name }: { image: string; name: string }) {
 
 function MapSelection() {
   const maps = [
+    { image: mapImages.abyss, name: "ABYSS" },
     { image: mapImages.ascent, name: "ASCENT" },
     { image: mapImages.bind, name: "BIND" },
     { image: mapImages.breeze, name: "BREEZE" },
     { image: mapImages.fracture, name: "FRACTURE" },
     { image: mapImages.haven, name: "HAVEN" },
+    { image: mapImages.icebox, name: "ICEBOX" },
+    { image: mapImages.lotus, name: "LOTUS" },
+    { image: mapImages.pearl, name: "PEARL" },
     { image: mapImages.split, name: "SPLIT" },
     { image: mapImages.sunset, name: "SUNSET" },
-    { image: mapImages.pearl, name: "PEARL" },
-    { image: mapImages.lotus, name: "LOTUS" },
-    { image: mapImages.icebox, name: "ICEBOX" },
   ];
 
   return (
@@ -96,10 +98,17 @@ function MapSelection() {
           <UnderlineWithHighlights />
         </div>
         
-        <div className="map-grid">
-          {maps.map((map) => (
-            <MapCard key={map.name} image={map.image} name={map.name} />
-          ))}
+        <div className="map-grid-container">
+          <div className="map-grid map-grid-top">
+            {maps.slice(0, 6).map((map) => (
+              <MapCard key={map.name} image={map.image} name={map.name} />
+            ))}
+          </div>
+          <div className="map-grid map-grid-bottom">
+            {maps.slice(6).map((map) => (
+              <MapCard key={map.name} image={map.image} name={map.name} />
+            ))}
+          </div>
         </div>
         
         <UnderlineWithHighlights />
