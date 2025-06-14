@@ -281,17 +281,12 @@ function GenerateButton() {
 
   return (
     <section className="section-container compact-spacing">
-      <div className="content-width">
-        <div className="generate-button-container">
+      <div className="content-width">        <div className="generate-button-container">
           <div className="generate-button" onClick={handleGenerate}>
             <div className="generate-button-background" />
             <div className="generate-button-text">
               GENERATE SCENARIO
             </div>
-            <div className="generate-button-corner top-left" />
-            <div className="generate-button-corner top-right" />
-            <div className="generate-button-corner bottom-left" />
-            <div className="generate-button-corner bottom-right" />
           </div>
         </div>
       </div>
