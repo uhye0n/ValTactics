@@ -79,6 +79,7 @@ html, body {
   gap: 16px;
   margin-bottom: 24px;
   max-width: 100%;
+  margin-left: 60px; /* 오른쪽으로 이동 */
 }
 
 .map-grid {
