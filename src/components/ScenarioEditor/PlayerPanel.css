@@ -1,0 +1,120 @@
+.player-panel {
+  background: #1a1a2e;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  color: white;
+}
+
+.player-panel h2 {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.team-section {
+  margin-bottom: 20px;
+}
+
+.team-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.team-title.attack {
+  color: #ff6b6b;
+}
+
+.team-title.defense {
+  color: #4ecdc4;
+}
+
+.players-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.player-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #0f1419;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.player-item:hover {
+  background: #16213e;
+  transform: translateX(2px);
+}
+
+.player-item.selected {
+  background: #16213e;
+  box-shadow: 0 0 0 2px #007acc;
+}
+
+.player-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.player-agent {
+  font-size: 12px;
+  font-weight: 600;
+  color: #e0e0e0;
+}
+
+.player-name {
+  font-size: 11px;
+  color: #a0a0a0;
+}
+
+.player-color-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #333;
+}
+
+.selected-player-info {
+  margin-top: 16px;
+  padding: 12px;
+  background: #16213e;
+  border-radius: 6px;
+  border: 1px solid #007acc;
+}
+
+.selected-player-info h4 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: #007acc;
+}
+
+.selected-player-info p {
+  margin: 0 0 12px 0;
+  font-size: 12px;
+  color: #e0e0e0;
+}
+
+.deselect-button {
+  background: #333;
+  color: white;
+  border: 1px solid #555;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.deselect-button:hover {
+  background: #444;
+}

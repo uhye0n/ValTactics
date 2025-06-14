@@ -1,3 +1,5 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import "./NewScenario/NewScenario.css";
 
 // Import placeholder images - replace with actual paths when available
@@ -42,6 +44,45 @@ const mapImages = {
   sunset: "/resources/images/view/Sunset.webp",
 };
 
+// Agent name mapping for URL parameters
+const agentNameToId: { [key: string]: string } = {
+  'Astra': 'astra',
+  'Breach': 'breach',
+  'Brimstone': 'brimstone',
+  'Chamber': 'chamber',
+  'Cypher': 'cypher',
+  'Fade': 'fade',
+  'Harbor': 'harbor',
+  'Jett': 'jett',
+  'KAY/O': 'kayo',
+  'Killjoy': 'killjoy',
+  'Neon': 'neon',
+  'Omen': 'omen',
+  'Phoenix': 'phoenix',
+  'Raze': 'raze',
+  'Reyna': 'reyna',
+  'Sage': 'sage',
+  'Skye': 'skye',
+  'Sova': 'sova',
+  'Viper': 'viper',
+  'Yoru': 'yoru'
+};
+
+// Map name to ID mapping
+const mapNameToId: { [key: string]: string } = {
+  'ABYSS': 'abyss',
+  'ASCENT': 'ascent',
+  'BIND': 'bind',
+  'BREEZE': 'breeze',
+  'FRACTURE': 'fracture',
+  'HAVEN': 'haven',
+  'ICEBOX': 'icebox',
+  'LOTUS': 'lotus',
+  'PEARL': 'pearl',
+  'SPLIT': 'split',
+  'SUNSET': 'sunset'
+};
+
 // Shared underline component
 function UnderlineWithHighlights({ width = 909, className = "" }: { width?: number; className?: string }) {
   return (
@@ -61,9 +102,22 @@ function UnderlineWithHighlights({ width = 909, className = "" }: { width?: numb
 }
 
 // Map Selection Component
-function MapCard({ image, name }: { image: string; name: string }) {
+function MapCard({ 
+  image, 
+  name, 
+  isSelected, 
+  onSelect 
+}: { 
+  image: string; 
+  name: string; 
+  isSelected: boolean;
+  onSelect: (name: string) => void;
+}) {
   return (
-    <div className="map-card">
+    <div 
+      className={`map-card ${isSelected ? 'selected' : ''}`}
+      onClick={() => onSelect(name)}
+    >
       <div
         className="map-card-background"
         style={{ backgroundImage: `url('${image}')` }}
@@ -75,7 +129,13 @@ function MapCard({ image, name }: { image: string; name: string }) {
   );
 }
 
-function MapSelection() {
+function MapSelection({ 
+  onMapSelect, 
+  selectedMap 
+}: { 
+  onMapSelect: (mapName: string) => void;
+  selectedMap: string;
+}) {
   const maps = [
     { image: mapImages.abyss, name: "ABYSS" },
     { image: mapImages.ascent, name: "ASCENT" },
@@ -101,12 +161,24 @@ function MapSelection() {
         <div className="map-grid-container">
           <div className="map-grid map-grid-top">
             {maps.slice(0, 6).map((map) => (
-              <MapCard key={map.name} image={map.image} name={map.name} />
+              <MapCard 
+                key={map.name} 
+                image={map.image} 
+                name={map.name}
+                isSelected={selectedMap === map.name}
+                onSelect={onMapSelect}
+              />
             ))}
           </div>
           <div className="map-grid map-grid-bottom">
             {maps.slice(6).map((map) => (
-              <MapCard key={map.name} image={map.image} name={map.name} />
+              <MapCard 
+                key={map.name} 
+                image={map.image} 
+                name={map.name}
+                isSelected={selectedMap === map.name}
+                onSelect={onMapSelect}
+              />
             ))}
           </div>
         </div>
@@ -118,9 +190,22 @@ function MapSelection() {
 }
 
 // Agent Selection Component
-function AgentProfile({ image }: { image: string; name: string }) {
+function AgentProfile({ 
+  image, 
+  name, 
+  isSelected, 
+  onSelect 
+}: { 
+  image: string; 
+  name: string; 
+  isSelected: boolean;
+  onSelect: (name: string) => void;
+}) {
   return (
-    <div className="agent-profile">
+    <div 
+      className={`agent-profile ${isSelected ? 'selected' : ''}`}
+      onClick={() => onSelect(name)}
+    >
       <div
         className="agent-profile-image"
         style={{ backgroundImage: `url('${image}')` }}
@@ -129,7 +214,17 @@ function AgentProfile({ image }: { image: string; name: string }) {
   );
 }
 
-function AgentSection({ title, teamType }: { title: string; teamType: 'our' | 'enemy' }) {
+function AgentSection({ 
+  title, 
+  teamType, 
+  onAgentSelect, 
+  selectedAgents 
+}: { 
+  title: string; 
+  teamType: 'our' | 'enemy';
+  onAgentSelect: (agentName: string, isOurTeam: boolean) => void;
+  selectedAgents: string[];
+}) {
   const agents = [
     { image: agentImages.astra, name: "Astra" },
     { image: agentImages.breach, name: "Breach" },
@@ -153,11 +248,15 @@ function AgentSection({ title, teamType }: { title: string; teamType: 'our' | 'e
     { image: agentImages.sage, name: "Sage" },
   ];
 
+  const handleAgentClick = (agentName: string) => {
+    onAgentSelect(agentName, teamType === 'our');
+  };
+
   return (
     <section className="section-container">
       <div className="content-width">
         <div className="section-header">
-          <h2 className="section-title">{title}</h2>
+          <h2 className="section-title">{title} ({selectedAgents.length}/5)</h2>
           <UnderlineWithHighlights />
         </div>
         
@@ -168,6 +267,8 @@ function AgentSection({ title, teamType }: { title: string; teamType: 'our' | 'e
                 key={`${teamType}-${agent.name}-${index}`}
                 image={agent.image}
                 name={agent.name}
+                isSelected={selectedAgents.includes(agent.name)}
+                onSelect={handleAgentClick}
               />
             ))}
           </div>
@@ -178,6 +279,8 @@ function AgentSection({ title, teamType }: { title: string; teamType: 'our' | 'e
                 key={`${teamType}-${agent.name}-${index + 10}`}
                 image={agent.image}
                 name={agent.name}
+                isSelected={selectedAgents.includes(agent.name)}
+                onSelect={handleAgentClick}
               />
             ))}
           </div>
@@ -273,16 +376,12 @@ function TemplateSection() {
 }
 
 // Generate Button Component
-function GenerateButton() {
-  const handleGenerate = () => {
-    // TODO: Implement scenario generation logic
-    console.log("Generate scenario clicked");
-  };
-
+function GenerateButton({ onGenerate }: { onGenerate: () => void }) {
   return (
     <section className="section-container compact-spacing">
-      <div className="content-width">        <div className="generate-button-container">
-          <div className="generate-button" onClick={handleGenerate}>
+      <div className="content-width">
+        <div className="generate-button-container">
+          <div className="generate-button" onClick={onGenerate}>
             <div className="generate-button-background" />
             <div className="generate-button-text">
               GENERATE SCENARIO
@@ -295,6 +394,52 @@ function GenerateButton() {
 }
 
 export default function NewScenario() {
+  const navigate = useNavigate();
+  const [selectedMap, setSelectedMap] = useState<string>('');
+  const [ourAgents, setOurAgents] = useState<string[]>([]);
+  const [enemyAgents, setEnemyAgents] = useState<string[]>([]);
+
+  const handleMapSelect = (mapName: string) => {
+    setSelectedMap(mapName);
+  };
+
+  const handleAgentSelect = (agentName: string, isOurTeam: boolean) => {
+    if (isOurTeam) {
+      setOurAgents(prev => {
+        if (prev.includes(agentName)) {
+          return prev.filter(agent => agent !== agentName);
+        } else if (prev.length < 5) {
+          return [...prev, agentName];
+        }
+        return prev;
+      });
+    } else {
+      setEnemyAgents(prev => {
+        if (prev.includes(agentName)) {
+          return prev.filter(agent => agent !== agentName);
+        } else if (prev.length < 5) {
+          return [...prev, agentName];
+        }
+        return prev;
+      });
+    }
+  };
+
+  const handleGenerateScenario = () => {
+    if (!selectedMap || ourAgents.length !== 5 || enemyAgents.length !== 5) {
+      alert('맵 1개와 각 팀의 요원 5명을 모두 선택해주세요.');
+      return;
+    }
+
+    const params = new URLSearchParams({
+      map: mapNameToId[selectedMap],
+      ourTeam: ourAgents.map(agent => agentNameToId[agent]).join(','),
+      enemyTeam: enemyAgents.map(agent => agentNameToId[agent]).join(',')
+    });
+
+    navigate(`/scenario-editor?${params.toString()}`);
+  };
+
   return (
     <div className="new-scenario">
       {/* Background */}
@@ -305,11 +450,21 @@ export default function NewScenario() {
       
       {/* Content */}
       <div className="new-scenario-content">
-        <MapSelection />
-        <AgentSection title="우리 팀 요원" teamType="our" />
-        <AgentSection title="상대 팀 요원" teamType="enemy" />
+        <MapSelection onMapSelect={handleMapSelect} selectedMap={selectedMap} />
+        <AgentSection 
+          title="우리 팀 요원" 
+          teamType="our" 
+          onAgentSelect={handleAgentSelect}
+          selectedAgents={ourAgents}
+        />
+        <AgentSection 
+          title="상대 팀 요원" 
+          teamType="enemy" 
+          onAgentSelect={handleAgentSelect}
+          selectedAgents={enemyAgents}
+        />
         <TemplateSection />
-        <GenerateButton />
+        <GenerateButton onGenerate={handleGenerateScenario} />
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { 
+import type { 
   Scenario, 
   ScenarioContextType, 
   ScenarioPlayback, 

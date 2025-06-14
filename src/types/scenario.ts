@@ -1,3 +1,4 @@
+// Scenario types for ValTactics
 export interface Player {
   id: string;
   name: string;
