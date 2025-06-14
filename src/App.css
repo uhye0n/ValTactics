@@ -13,7 +13,7 @@
   --panel-font-size-highlighted: 50px;
   --panel-letter-spacing: 0.02em;
   --panel-line-height: 1;
-  --panel-left-position: 4rem; /* 헤더 컨테이너의 좌우 패딩과 동일하게 설정 */
+  --panel-left-position: 8rem; /* 패널을 오른쪽으로 이동 (4rem -> 8rem) */
   --scenario-card-width: 260px; /* 크기 축소 */
   --scenario-card-height: 180px; /* 크기 축소 */
 }
