@@ -190,21 +190,36 @@ function AgentSection({ title, teamType }: { title: string; teamType: 'our' | 'e
 }
 
 // Template Component
-function TemplateCard({ title, agents }: { title: string; agents: string }) {
+function TemplateCard({ title, agents, backgroundImage }: { title: string; agents: string; backgroundImage: string }) {
   return (
     <div className="template-card">
+      {/* Background border */}
+      <div className="template-card-border" />
+      
+      {/* Background image with opacity */}
       <div
-        className="template-card-background"
-        style={{ backgroundImage: `url('${backgroundImg}')` }}
+        className="template-card-image"
+        style={{ backgroundImage: `url('${backgroundImage}')` }}
       />
       
       <div className="template-card-content">
         <h3 className="template-card-title">{title}</h3>
-        <p className="template-card-agents">{agents}</p>
-        <UnderlineWithHighlights width={182} />
-        <div className="template-card-icon" />
+        <div className="template-card-underline-group">
+          <div className="template-card-line-main" />
+          <div className="template-card-line-left" />
+          <div className="template-card-line-right" />
+        </div>        <p className="template-card-agents">{agents}</p>
+        
+        {/* Diamond icon */}
+        <div className="template-card-diamond">
+          <div 
+            className="template-card-crosshair"
+            style={{ backgroundImage: `url('/resources/images/crosshair.png')` }}
+          />
+        </div>
       </div>
       
+      {/* Corner squares */}
       <div className="template-card-corner top-left" />
       <div className="template-card-corner top-right" />
       <div className="template-card-corner bottom-left" />
@@ -215,9 +230,21 @@ function TemplateCard({ title, agents }: { title: string; agents: string }) {
 
 function TemplateSection() {
   const templates = [
-    { title: "ASCENT ATTACK", agents: "Jett / Fade / KayO / KillJoy / Omen" },
-    { title: "BIND ATTACK", agents: "Jett / Fade / KayO / KillJoy / Omen" },
-    { title: "HAVEN ATTACK", agents: "Jett / Fade / KayO / KillJoy / Omen" },
+    { 
+      title: "ASCENT ATTACK", 
+      agents: "Jett / Fade / KayO / KillJoy / Omen",
+      backgroundImage: "/resources/images/view/Ascent.webp"
+    },
+    { 
+      title: "BIND ATTACK", 
+      agents: "Jett / Fade / KayO / KillJoy / Omen",
+      backgroundImage: "/resources/images/view/Bind.webp"
+    },
+    { 
+      title: "HAVEN ATTACK", 
+      agents: "Jett / Fade / KayO / KillJoy / Omen",
+      backgroundImage: "/resources/images/view/Haven.webp"
+    },
   ];
 
   return (
@@ -230,7 +257,12 @@ function TemplateSection() {
         
         <div className="template-grid">
           {templates.map((template) => (
-            <TemplateCard key={template.title} title={template.title} agents={template.agents} />
+            <TemplateCard 
+              key={template.title} 
+              title={template.title} 
+              agents={template.agents}
+              backgroundImage={template.backgroundImage}
+            />
           ))}
         </div>
         
