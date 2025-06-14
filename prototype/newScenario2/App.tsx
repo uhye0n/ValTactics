@@ -154,16 +154,17 @@ function MapCard({ image, name }: { image: string; name: string }) {
 
 function MapSelection() {
   const maps = [
-    { image: imgAscent, name: "ASCENT" },
-    { image: imgBind, name: "BIND" },
-    { image: imgBreeze, name: "BREEZE" },
-    { image: imgFracture, name: "FRACTURE" },
-    { image: imgHaven, name: "HAVEN" },
-    { image: imgSplit, name: "SPLIT" },
-    { image: imgImage13, name: "SUNSET" },
-    { image: imgPearl, name: "PEARL" },
-    { image: imgLotus, name: "LOTUS" },
-    { image: imgIcebox, name: "ICEBOX" },
+    { image: "/resources/images/view/Abyss.webp", name: "ABYSS" },
+    { image: "/resources/images/view/Ascent.webp", name: "ASCENT" },
+    { image: "/resources/images/view/Bind.webp", name: "BIND" },
+    { image: "/resources/images/view/Breeze.webp", name: "BREEZE" },
+    { image: "/resources/images/view/Fracture.webp", name: "FRACTURE" },
+    { image: "/resources/images/view/Haven.webp", name: "HAVEN" },
+    { image: "/resources/images/view/Icebox.webp", name: "ICEBOX" },
+    { image: "/resources/images/view/Lotus.webp", name: "LOTUS" },
+    { image: "/resources/images/view/Pearl.webp", name: "PEARL" },
+    { image: "/resources/images/view/Split.webp", name: "SPLIT" },
+    { image: "/resources/images/view/Sunset.webp", name: "SUNSET" },
   ];
 
   return (

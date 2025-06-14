@@ -29,17 +29,17 @@ const agentImages = {
 
 // Map images - using view images from resources
 const mapImages = {
-  abyss: "/resources/images/view/Abyss_view.webp",
-  ascent: "/resources/images/view/Ascent_view.webp",
-  bind: "/resources/images/view/Bind_view.webp",
-  breeze: "/resources/images/view/Breeze_view.webp",
-  fracture: "/resources/images/view/Fracture_view.webp",
-  haven: "/resources/images/view/Haven_view.webp",
-  icebox: "/resources/images/view/Icebox_view.webp",
-  lotus: "/resources/images/view/Lotus_view.webp",
-  pearl: "/resources/images/view/Pearl_view.webp",
-  split: "/resources/images/view/Split_view.webp",
-  sunset: "/resources/images/view/Sunset_view.webp",
+  abyss: "/resources/images/view/Abyss.webp",
+  ascent: "/resources/images/view/Ascent.webp",
+  bind: "/resources/images/view/Bind.webp",
+  breeze: "/resources/images/view/Breeze.webp",
+  fracture: "/resources/images/view/Fracture.webp",
+  haven: "/resources/images/view/Haven.webp",
+  icebox: "/resources/images/view/Icebox.webp",
+  lotus: "/resources/images/view/Lotus.webp",
+  pearl: "/resources/images/view/Pearl.webp",
+  split: "/resources/images/view/Split.webp",
+  sunset: "/resources/images/view/Sunset.webp",
 };
 
 // Shared underline component

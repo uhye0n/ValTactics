@@ -1,11 +1,11 @@
-import { MapData, Skill } from '../types/scenario';
+import type { MapData, Skill } from '../types/scenario';
 
 export const VALORANT_MAPS: MapData[] = [
   {
     id: 'abyss',
     name: 'Abyss',
     imageUrl: '/resources/images/map/Abyss_map.webp',
-    viewImageUrl: '/resources/images/view/Abyss_view.webp',
+    viewImageUrl: '/resources/images/view/Abyss.webp',
     dimensions: { width: 1024, height: 1024 },
     callouts: []
   },
@@ -13,7 +13,7 @@ export const VALORANT_MAPS: MapData[] = [
     id: 'ascent',
     name: 'Ascent',
     imageUrl: '/resources/images/map/Ascent_map.webp',
-    viewImageUrl: '/resources/images/view/Ascent_view.webp',
+    viewImageUrl: '/resources/images/view/Ascent.webp',
     dimensions: { width: 1024, height: 1024 },
     callouts: []
   },
@@ -21,7 +21,7 @@ export const VALORANT_MAPS: MapData[] = [
     id: 'bind',
     name: 'Bind',
     imageUrl: '/resources/images/map/Bind_map.webp',
-    viewImageUrl: '/resources/images/view/Bind_view.webp',
+    viewImageUrl: '/resources/images/view/Bind.webp',
     dimensions: { width: 1024, height: 1024 },
     callouts: []
   },
@@ -29,15 +29,14 @@ export const VALORANT_MAPS: MapData[] = [
     id: 'breeze',
     name: 'Breeze',
     imageUrl: '/resources/images/map/Breeze_map.webp',
-    viewImageUrl: '/resources/images/view/Breeze_view.webp',
+    viewImageUrl: '/resources/images/view/Breeze.webp',
     dimensions: { width: 1024, height: 1024 },
     callouts: []
-  },
-  {
+  },  {
     id: 'fracture',
     name: 'Fracture',
     imageUrl: '/resources/images/map/Fracture_map.webp',
-    viewImageUrl: '/resources/images/view/Fracture_view.webp',
+    viewImageUrl: '/resources/images/view/Fracture.webp',
     dimensions: { width: 1024, height: 1024 },
     callouts: []
   },
@@ -45,7 +44,7 @@ export const VALORANT_MAPS: MapData[] = [
     id: 'haven',
     name: 'Haven',
     imageUrl: '/resources/images/map/Haven_map.webp',
-    viewImageUrl: '/resources/images/view/Haven_view.webp',
+    viewImageUrl: '/resources/images/view/Haven.webp',
     dimensions: { width: 1024, height: 1024 },
     callouts: []
   },
@@ -53,7 +52,7 @@ export const VALORANT_MAPS: MapData[] = [
     id: 'icebox',
     name: 'Icebox',
     imageUrl: '/resources/images/map/Icebox_map.webp',
-    viewImageUrl: '/resources/images/view/Icebox_view.webp',
+    viewImageUrl: '/resources/images/view/Icebox.webp',
     dimensions: { width: 1024, height: 1024 },
     callouts: []
   },
@@ -61,7 +60,7 @@ export const VALORANT_MAPS: MapData[] = [
     id: 'lotus',
     name: 'Lotus',
     imageUrl: '/resources/images/map/Lotus_map.webp',
-    viewImageUrl: '/resources/images/view/Lotus_view.webp',
+    viewImageUrl: '/resources/images/view/Lotus.webp',
     dimensions: { width: 1024, height: 1024 },
     callouts: []
   },
@@ -69,7 +68,7 @@ export const VALORANT_MAPS: MapData[] = [
     id: 'pearl',
     name: 'Pearl',
     imageUrl: '/resources/images/map/Pearl_map.webp',
-    viewImageUrl: '/resources/images/view/Pearl_view.webp',
+    viewImageUrl: '/resources/images/view/Pearl.webp',
     dimensions: { width: 1024, height: 1024 },
     callouts: []
   },
@@ -77,7 +76,7 @@ export const VALORANT_MAPS: MapData[] = [
     id: 'split',
     name: 'Split',
     imageUrl: '/resources/images/map/Split_map.webp',
-    viewImageUrl: '/resources/images/view/Split_view.webp',
+    viewImageUrl: '/resources/images/view/Split.webp',
     dimensions: { width: 1024, height: 1024 },
     callouts: []
   },
@@ -85,7 +84,7 @@ export const VALORANT_MAPS: MapData[] = [
     id: 'sunset',
     name: 'Sunset',
     imageUrl: '/resources/images/map/Sunset_map.webp',
-    viewImageUrl: '/resources/images/view/Sunset_view.webp',
+    viewImageUrl: '/resources/images/view/Sunset.webp',
     dimensions: { width: 1024, height: 1024 },
     callouts: []
   }
