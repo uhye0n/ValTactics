@@ -7,7 +7,7 @@
 
 html, body {
   scroll-behavior: smooth;
-  overflow-x: auto !important;
+  overflow-x: hidden !important;
   overflow-y: auto !important;
   height: auto !important;
   min-height: 100vh;
@@ -21,6 +21,7 @@ html, body {
 .new-scenario {
   position: relative;
   width: 100%;
+  min-width: 1400px; /* 메인 화면과 동일한 최소 가로 크기 설정 */
   min-height: 200vh; /* 강제로 높은 높이 설정 */
   /* 배경색은 app__background에서 처리하므로 제거 */
 }
@@ -534,6 +535,29 @@ html, body {
 }
 
 .content-width {
-  width: 909px;
+  width: 920px;
   margin: 0 auto;
+  padding: 0 2rem; /* 좌우 여백 추가 */
+}
+
+/* Responsive Design - Fixed layout for small screens */
+/* 화면이 최소 크기보다 작아지면 스크롤바 생성 */
+@media (max-width: 1399px) {
+  html, body {
+    overflow-x: auto !important; /* 가로 스크롤바 강제 활성화 */
+  }
+  
+  .new-scenario {
+    min-width: 1400px; /* 최소 크기 유지 */
+  }
+}
+
+@media (max-height: 800px) {
+  html, body {
+    overflow-y: auto !important; /* 세로 스크롤바 강제 활성화 */
+  }
+  
+  .new-scenario {
+    min-height: 800px; /* 최소 세로 크기 보장 */
+  }
 }
