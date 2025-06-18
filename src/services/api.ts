@@ -166,6 +166,39 @@ class ApiService {
     return this.request(`/scenarios/${scenarioId}/timeline`, {
       method: 'PUT',
       body: JSON.stringify(timelineData),
+    })  }
+
+  // 플레이어 액션 기록
+  async recordPlayerAction(scenarioId: string, actionData: {
+    playerId: string;
+    actionType: string;
+    timestamp: number;
+    position?: { x: number; y: number };
+    data?: any;
+  }) {
+    return this.request(`/scenarios/${scenarioId}/actions`, {
+      method: 'POST',
+      body: JSON.stringify(actionData),
+    })
+  }
+
+  // 타임라인 이벤트 업데이트
+  async updateTimelineEvent(scenarioId: string, eventId: string, updates: {
+    timestamp?: number;
+    eventType?: string;
+    description?: string;
+    data?: any;
+  }) {
+    return this.request(`/scenarios/${scenarioId}/events/${eventId}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+    })
+  }
+
+  // 타임라인 이벤트 삭제
+  async deleteTimelineEvent(scenarioId: string, eventId: string) {
+    return this.request(`/scenarios/${scenarioId}/events/${eventId}`, {
+      method: 'DELETE',
     })
   }
 

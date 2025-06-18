@@ -19,9 +19,8 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [dragActionId, setDragActionId] = useState<string | null>(null);
   const [scale, setScale] = useState(1);
-  
-  const duration = scenario.timeline.duration;
-  const currentTime = scenario.timeline.currentTime;
+    const duration = scenario.timeline?.duration || 30000; // 기본 30초
+  const currentTime = 0; // 현재 시간은 props로 받거나 상태로 관리해야 함
 
   const formatTime = (milliseconds: number) => {
     const seconds = Math.floor(milliseconds / 1000);
@@ -47,15 +46,20 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
     setIsDragging(true);
     setDragActionId(actionId);
   };
-
-  const actionsByPlayer = scenario.players.reduce((acc, player) => {
-    acc[player.id] = scenario.actions
-      .filter(action => action.playerId === player.id)
-      .sort((a, b) => a.timestamp - b.timestamp);
+  const actionsByPlayer = scenario.teams?.reduce((acc, team) => {
+    const events = scenario.timeline?.events?.filter(event => {
+      try {
+        const eventData = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+        return eventData?.playerId === team.id;
+      } catch {
+        return false;
+      }
+    }) || [];
+    
+    acc[team.id] = events.sort((a, b) => a.timestamp - b.timestamp);
     return acc;
-  }, {} as Record<string, PlayerAction[]>);
-
-  const getActionColor = (type: PlayerAction['type']) => {
+  }, {} as Record<string, any[]>) || {};
+  const getActionColor = (type: string) => {
     switch (type) {
       case 'move': return '#4ecdc4';
       case 'skill': return '#ffe66d';
@@ -68,7 +72,7 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
     }
   };
 
-  const getActionIcon = (type: PlayerAction['type']) => {
+  const getActionIcon = (type: string) => {
     switch (type) {
       case 'move': return '🚶';
       case 'skill': return '⚡';
@@ -135,40 +139,37 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
           <div className="time-handle"></div>
         </div>
 
-        <div className="timeline-tracks">
-          {scenario.players.map((player) => (
-            <div key={player.id} className="timeline-track">
+        <div className="timeline-tracks">          {scenario.teams?.map((team) => (
+            <div key={team.id} className="timeline-track">
               <div className="track-header">
                 <div 
                   className="player-indicator"
-                  style={{ backgroundColor: player.color }}
+                  style={{ backgroundColor: team.teamType === 'our' ? '#4CAF50' : '#F44336' }}
                 ></div>
-                <span className="player-name">{player.agent}</span>
+                <span className="player-name">{team.agentName}</span>
               </div>
-              
-              <div className="track-content">
-                {actionsByPlayer[player.id]?.map(action => {
-                  const position = (action.timestamp / duration) * 100;
+                <div className="track-content">                {actionsByPlayer[team.id]?.map(event => {
+                  const position = (event.timestamp / duration) * 100;
                   return (
                     <div
-                      key={action.id}
-                      className={`action-marker ${dragActionId === action.id ? 'dragging' : ''}`}
+                      key={event.id}
+                      className={`action-marker ${dragActionId === event.id ? 'dragging' : ''}`}
                       style={{
                         left: `${40 + position * (100 - 80) / 100}px`,
-                        backgroundColor: getActionColor(action.type)
+                        backgroundColor: getActionColor(event.eventType || 'unknown')
                       }}
-                      onMouseDown={(e) => handleActionDragStart(action.id, e)}
-                      title={`${action.type} at ${formatTime(action.timestamp)}`}
+                      onMouseDown={(e) => handleActionDragStart(event.id, e)}
+                      title={`${event.eventType} at ${formatTime(event.timestamp)}`}
                     >
-                      <span className="action-icon">{getActionIcon(action.type)}</span>
+                      <span className="action-icon">{getActionIcon(event.eventType || 'unknown')}</span>
                       <div className="action-tooltip">
-                        <div>{action.type}</div>
-                        <div>{formatTime(action.timestamp)}</div>
+                        <div>{event.eventType}</div>
+                        <div>{formatTime(event.timestamp)}</div>
                         <button
                           className="delete-action"
                           onClick={(e) => {
                             e.stopPropagation();
-                            onActionDelete(action.id);
+                            onActionDelete(event.id);
                           }}
                         >
                           ×
@@ -196,9 +197,8 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
       <div className="timeline-info">
         <div className="duration-info">
           총 시간: {formatTime(duration)} | 현재: {formatTime(currentTime)}
-        </div>
-        <div className="actions-count">
-          총 액션: {scenario.actions.length}개
+        </div>        <div className="actions-count">
+          총 액션: {scenario.timeline?.events?.length || 0}개
         </div>
       </div>
     </div>

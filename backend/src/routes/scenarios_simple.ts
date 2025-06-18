@@ -204,16 +204,29 @@ router.post('/', async (req: any, res) => {
               position: team.position
             }))
           ]
+        },        timeline: {
+          create: {
+            duration: 30000, // 기본 30초
+            rounds: 1
+          }
         }
-      },
+      }
+    });    // 생성된 시나리오를 다시 조회하여 관련 데이터와 함께 반환
+    const fullScenario = await (prisma.scenario as any).findUnique({
+      where: { id: scenario.id },
       include: {
-        teams: true
+        teams: true,
+        timeline: {
+          include: {
+            events: true
+          }
+        }
       }
     });
     
     console.log('시나리오 생성 성공:', scenario.id);
 
-    res.status(201).json(scenario)
+    res.status(201).json(fullScenario)
   } catch (error) {
     console.error('Error creating scenario:', error)
     if (error instanceof z.ZodError) {
@@ -249,5 +262,115 @@ router.delete('/:id', async (req: any, res: any) => {
     res.status(500).json({ error: '시나리오 삭제에 실패했습니다.' });
   }
 })
+
+// 플레이어 액션 기록 (타임라인 이벤트 생성)
+router.post('/:id/actions', async (req: any, res) => {
+  try {
+    const scenarioId = req.params.id;
+    const { playerId, actionType, timestamp, position, data } = req.body;
+    
+    console.log('플레이어 액션 기록:', { scenarioId, playerId, actionType, timestamp });
+    
+    // 시나리오의 타임라인 찾기
+    const scenario = await (prisma.scenario as any).findUnique({
+      where: { id: scenarioId },
+      include: { timeline: true }
+    });
+    
+    if (!scenario) {
+      return res.status(404).json({ error: '시나리오를 찾을 수 없습니다.' });
+    }
+    
+    if (!scenario.timeline) {
+      return res.status(400).json({ error: '시나리오에 타임라인이 없습니다.' });
+    }
+      // 타임라인 이벤트 생성
+    const event = await (prisma as any).timelineEvent.create({
+      data: {
+        timelineId: scenario.timeline.id,
+        timestamp: timestamp,
+        eventType: actionType,
+        description: `플레이어 ${playerId} ${actionType} 액션`,
+        data: JSON.stringify({
+          playerId,
+          actionType,
+          position,
+          ...data
+        })
+      }
+    });
+    
+    console.log('타임라인 이벤트 생성 성공:', event.id);
+    res.status(201).json(event);
+  } catch (error) {
+    console.error('Error creating player action:', error);
+    res.status(500).json({ error: '플레이어 액션 기록에 실패했습니다.' });
+  }
+})
+
+// 타임라인 이벤트 업데이트
+router.put('/:id/events/:eventId', async (req, res) => {
+  try {
+    const { id: scenarioId, eventId } = req.params;
+    const updates = req.body;
+    
+    console.log('타임라인 이벤트 업데이트 요청:', { scenarioId, eventId, updates });
+    
+    // 시나리오 존재 확인
+    const scenario = await (prisma as any).scenario.findUnique({
+      where: { id: scenarioId },
+      include: { timeline: true }
+    });
+    
+    if (!scenario) {
+      return res.status(404).json({ error: '시나리오를 찾을 수 없습니다.' });
+    }
+    
+    // 이벤트 업데이트
+    const updatedEvent = await (prisma as any).timelineEvent.update({
+      where: { id: eventId },
+      data: {
+        ...updates,
+        data: updates.data ? JSON.stringify(updates.data) : undefined
+      }
+    });
+    
+    console.log('타임라인 이벤트 업데이트 성공:', updatedEvent.id);
+    res.json(updatedEvent);
+  } catch (error) {
+    console.error('Error updating timeline event:', error);
+    res.status(500).json({ error: '타임라인 이벤트 업데이트에 실패했습니다.' });
+  }
+});
+
+// 타임라인 이벤트 삭제
+router.delete('/:id/events/:eventId', async (req, res) => {
+  try {
+    const { id: scenarioId, eventId } = req.params;
+    
+    console.log('타임라인 이벤트 삭제 요청:', { scenarioId, eventId });
+    
+    // 시나리오 존재 확인
+    const scenario = await (prisma as any).scenario.findUnique({
+      where: { id: scenarioId },
+      include: { timeline: true }
+    });
+    
+    if (!scenario) {
+      return res.status(404).json({ error: '시나리오를 찾을 수 없습니다.' });
+    }
+    
+    // 이벤트 삭제
+    await (prisma as any).timelineEvent.delete({
+      where: { id: eventId }
+    });
+    
+    console.log('타임라인 이벤트 삭제 성공:', eventId);
+    res.status(204).send();
+  } catch (error) {
+    console.error('Error deleting timeline event:', error);
+    res.status(500).json({ error: '타임라인 이벤트 삭제에 실패했습니다.' });
+  }
+});
 
 export default router

@@ -7,16 +7,14 @@ import TimelineEditor from './TimelineEditor';
 import PlayerPanel from './PlayerPanel';
 import ActionSelectionPanel from './ActionSelectionPanel';
 import PlaybackControls from './PlaybackControls';
+import apiService from '../../services/api';
 import './ScenarioEditorComplete.css';
 
 const ScenarioEditor: React.FC = () => {
   const { scenarioId } = useParams<{ scenarioId: string }>();
   const navigate = useNavigate();
-  const { currentScenario, loadScenario, isLoading } = useScenario();
-  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
+  const { currentScenario, loadScenario, isLoading } = useScenario();  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
   const [selectedAction, setSelectedAction] = useState<string | null>(null);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [rightPanelMode, setRightPanelMode] = useState<'players' | 'actions'>('players');
   const [loadError, setLoadError] = useState<string | null>(null);
   
@@ -30,7 +28,6 @@ const ScenarioEditor: React.FC = () => {
   const [playerPositions, setPlayerPositions] = useState<{ [playerId: string]: { x: number, y: number } }>({});
   const [draggedPlayer, setDraggedPlayer] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-
   // 시나리오 로드
   useEffect(() => {
     if (!scenarioId) {
@@ -50,6 +47,37 @@ const ScenarioEditor: React.FC = () => {
 
     loadScenarioData();
   }, [scenarioId, loadScenario]);
+
+  // 키보드 이벤트 핸들러 (스킬 사용 등)
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (!selectedPlayerId) return;
+      
+      const currentPos = getPlayerPosition(players.find(p => p.id === selectedPlayerId));
+      
+      switch (e.key.toLowerCase()) {
+        case 'q':
+          recordPlayerAction(selectedPlayerId, 'skill', currentPos, { skillType: 'Q', skillName: 'Ability Q' });
+          break;
+        case 'e':
+          recordPlayerAction(selectedPlayerId, 'skill', currentPos, { skillType: 'E', skillName: 'Ability E' });
+          break;
+        case 'c':
+          recordPlayerAction(selectedPlayerId, 'skill', currentPos, { skillType: 'C', skillName: 'Ability C' });
+          break;
+        case 'x':
+          recordPlayerAction(selectedPlayerId, 'skill', currentPos, { skillType: 'X', skillName: 'Ultimate' });
+          break;
+        case ' ':
+          e.preventDefault();
+          recordPlayerAction(selectedPlayerId, 'shoot', currentPos, { weaponType: 'primary' });
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [selectedPlayerId, playerPositions]);
   // 로딩 또는 에러 상태 표시
   if (isLoading) {
     return (
@@ -108,10 +136,27 @@ const ScenarioEditor: React.FC = () => {
     if (playerId) {
       setRightPanelMode('actions'); // 플레이어 선택 후 액션 패널로 전환
     }
-  };
-  const handleActionSelect = (actionType: string) => {
+  };  const handleActionSelect = (actionType: string) => {
     setSelectedAction(actionType);
-  };  // 맵 드래그 이벤트 핸들러들
+  };
+
+  // 플레이어 액션 기록 함수
+  const recordPlayerAction = async (playerId: string, actionType: 'move' | 'skill' | 'shoot' | 'plant' | 'defuse' | 'death' | 'revive', position: { x: number; y: number }, data?: any) => {
+    if (!currentScenario?.id) return;
+    
+    try {
+      await apiService.recordPlayerAction(currentScenario.id, {
+        playerId,
+        actionType,
+        timestamp: Date.now(),
+        position,
+        data
+      });
+      console.log(`Recorded ${actionType} action for player ${playerId}`);
+    } catch (error) {
+      console.error('Failed to record player action:', error);
+    }
+  };// 맵 드래그 이벤트 핸들러들
   const handleMouseDown = (e: React.MouseEvent) => {
     // 플레이어를 드래그하는 중이면 맵 드래그 방지
     if (draggedPlayer) return;
@@ -244,8 +289,13 @@ const ScenarioEditor: React.FC = () => {
         [playerId]: { x: clampedX, y: clampedY }
       }));
     };
-    
-    const handleMouseUp = () => {
+      const handleMouseUp = () => {
+      // 드래그가 끝났을 때 최종 위치를 기록
+      if (draggedPlayer && playerPositions[draggedPlayer]) {
+        const finalPosition = playerPositions[draggedPlayer];
+        recordPlayerAction(draggedPlayer, 'move', finalPosition);
+      }
+      
       setDraggedPlayer(null);
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
@@ -390,48 +440,33 @@ const ScenarioEditor: React.FC = () => {
               </div>
             </div>
               {/* 하단 타임라인 */}
-            <div className="timeline-section">
-              <div className="timeline-header">                <h3 style={{ color: '#ffffff', margin: 0, fontSize: '18px', fontFamily: 'Fascinate, sans-serif' }}>
-                  타임라인 에디터
-                </h3>
-                <div className="timeline-controls" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>                  <button style={{ 
-                    background: 'rgba(255, 255, 255, 0.2)', 
-                    border: '1px solid rgba(255, 255, 255, 0.5)', 
-                    color: '#fff', 
-                    padding: '8px 16px', 
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    fontSize: '12px'
-                  }}>
-                    재생
-                  </button>
-                  <button style={{ 
-                    background: 'rgba(255, 255, 255, 0.2)', 
-                    border: '1px solid rgba(255, 255, 255, 0.5)', 
-                    color: '#fff', 
-                    padding: '8px 16px', 
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    fontSize: '12px'
-                  }}>
-                    정지
-                  </button>
-                  <span style={{ color: '#fff', fontSize: '14px' }}>00:00 / 00:30</span>
-                </div>
-              </div>
-              <div className="timeline-content" style={{ 
-                flex: 1, 
-                background: 'rgba(0, 0, 0, 0.3)', 
-                borderRadius: '8px', 
-                padding: '10px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'rgba(255, 255, 255, 0.6)',
-                fontSize: '14px'
-              }}>
-                타임라인 트랙이 여기에 표시됩니다
-              </div>
+            <div className="timeline-section">              <TimelineEditor
+                scenario={currentScenario}
+                onTimeChange={(time: number) => {
+                  console.log('Timeline time changed to:', time);
+                  // 필요시 시나리오의 현재 시간 업데이트
+                }}
+                onActionUpdate={async (actionId, updates) => {
+                  try {
+                    await apiService.updateTimelineEvent(currentScenario.id, actionId, updates);
+                    console.log('Timeline event updated successfully');
+                    // 시나리오 다시 로드하여 UI 업데이트
+                    await loadScenario(currentScenario.id);
+                  } catch (error) {
+                    console.error('Failed to update timeline event:', error);
+                  }
+                }}
+                onActionDelete={async (actionId) => {
+                  try {
+                    await apiService.deleteTimelineEvent(currentScenario.id, actionId);
+                    console.log('Timeline event deleted successfully');
+                    // 시나리오 다시 로드하여 UI 업데이트
+                    await loadScenario(currentScenario.id);
+                  } catch (error) {
+                    console.error('Failed to delete timeline event:', error);
+                  }
+                }}
+              />
             </div>
           </div>
 
