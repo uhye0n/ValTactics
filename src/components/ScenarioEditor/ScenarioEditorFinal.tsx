@@ -19,7 +19,7 @@ const ScenarioEditor: React.FC = () => {
   // 맵 팬 기능을 위한 상태
   const [mapOffset, setMapOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
-  const [mapScale, setMapScale] = useState(1.2); // 초기 스케일을 1에서 1.2로 증가
+  const [mapScale, setMapScale] = useState(1);
   const mapContainerRef = useRef<HTMLDivElement>(null);
 
   // 테스트용 더미 시나리오 데이터
@@ -33,12 +33,13 @@ const ScenarioEditor: React.FC = () => {
     updatedAt: new Date(),
     isPublic: false,
     tags: [],
-    players: [      {
+    players: [
+      {
         id: 'player-1',
         name: 'Jett',
         agent: 'Jett',
         team: 'attack' as const,
-        color: '#ff4757' // 파란색에서 붉은색으로 변경
+        color: '#00d4ff'
       },
       {
         id: 'player-2', 
@@ -102,7 +103,8 @@ const ScenarioEditor: React.FC = () => {
   };
   const handleActionSelect = (actionType: string) => {
     setSelectedAction(actionType);
-  };  // 맵 드래그 이벤트 핸들러들
+  };
+  // 맵 드래그 이벤트 핸들러들
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button === 1) { // 마우스 가운데 버튼 (휠 클릭)
       e.preventDefault();
@@ -111,63 +113,31 @@ const ScenarioEditor: React.FC = () => {
       // 현재 마우스 위치와 맵 오프셋의 차이를 계산
       const startX = e.clientX - mapOffset.x;
       const startY = e.clientY - mapOffset.y;
-        const handleMouseMove = (moveEvent: MouseEvent) => {
+      
+      const handleMouseMove = (moveEvent: MouseEvent) => {
         if (mapContainerRef.current) {
-          const containerRect = mapContainerRef.current.getBoundingClientRect();
-          
-          // 맵 이미지의 실제 크기 계산 (200% * 스케일)
-          const imageScale = 2.0 * mapScale; // 200% CSS + 동적 스케일
-          const scaledImageWidth = containerRect.width * imageScale;
-          const scaledImageHeight = containerRect.height * imageScale;
-          
-          // 컨테이너를 벗어나지 않도록 최대 오프셋 계산
-          const maxOffsetX = Math.max(0, (scaledImageWidth - containerRect.width) / 2);
-          const maxOffsetY = Math.max(0, (scaledImageHeight - containerRect.height) / 2);
-          
-          let newX = moveEvent.clientX - startX;
-          let newY = moveEvent.clientY - startY;
-          
-          // 드래그 범위 제한 - 이미지 크기에 비례하여 자연스럽게 제한
-          newX = Math.max(-maxOffsetX, Math.min(maxOffsetX, newX));
-          newY = Math.max(-maxOffsetY, Math.min(maxOffsetY, newY));
-          
+          const newX = moveEvent.clientX - startX;
+          const newY = moveEvent.clientY - startY;
           setMapOffset({ x: newX, y: newY });
         }
       };
-        const handleMouseUp = () => {
+      
+      const handleMouseUp = () => {
         setIsDragging(false);
-        document.body.classList.remove('map-active'); // body 드래그 방지 해제
         document.removeEventListener('mousemove', handleMouseMove);
         document.removeEventListener('mouseup', handleMouseUp);
       };
       
-      document.body.classList.add('map-active'); // body 드래그 방지 활성화
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
     }
   };
+
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
     const scaleChange = e.deltaY > 0 ? 0.9 : 1.1;
     const newScale = Math.min(Math.max(mapScale * scaleChange, 0.5), 3);
     setMapScale(newScale);
-    
-    // 스케일 변경 시 오프셋 범위 재조정
-    if (mapContainerRef.current) {
-      const containerRect = mapContainerRef.current.getBoundingClientRect();
-      const imageScale = 2.0 * newScale;
-      const scaledImageWidth = containerRect.width * imageScale;
-      const scaledImageHeight = containerRect.height * imageScale;
-      
-      const maxOffsetX = Math.max(0, (scaledImageWidth - containerRect.width) / 2);
-      const maxOffsetY = Math.max(0, (scaledImageHeight - containerRect.height) / 2);
-      
-      // 현재 오프셋이 새로운 범위를 벗어나면 조정
-      setMapOffset(prev => ({
-        x: Math.min(Math.max(prev.x, -maxOffsetX), maxOffsetX),
-        y: Math.min(Math.max(prev.y, -maxOffsetY), maxOffsetY)
-      }));
-    }
   };
   const handleMapClick = (position: Position) => {
     if (selectedPlayerId && selectedAction && scenario) {
@@ -194,11 +164,11 @@ const ScenarioEditor: React.FC = () => {
         <div className="editor-main-container">
           {/* 왼쪽: 맵 영역 */}
           <div className="editor-map-section">
-            <div className="map-container" ref={mapContainerRef}>              <div 
-                className={`map-canvas ${isDragging ? 'dragging' : ''}`}
+            <div className="map-container" ref={mapContainerRef}>
+              <div 
+                className="map-canvas"
                 onMouseDown={handleMouseDown}
                 onWheel={handleWheel}
-                onContextMenu={(e) => e.preventDefault()} // 우클릭 메뉴 방지
                 style={{
                   cursor: isDragging ? 'grabbing' : 'grab',
                   userSelect: 'none'
