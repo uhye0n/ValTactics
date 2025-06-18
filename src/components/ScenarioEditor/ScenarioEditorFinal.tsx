@@ -252,30 +252,26 @@ const ScenarioEditor: React.FC = () => {
     }
   };
 
-  // --- 드래그 핸들러만 남기고 상태 중복 선언 제거 ---
+  // --- 드래그 핸들러 개선: window 이벤트 등록 대신 div에 직접 부착 ---
   const handleMapMouseDown = (e: React.MouseEvent) => {
     if (e.button === 2) { // 우클릭
       e.preventDefault();
       setIsDragging(true);
       setDragStart({ x: e.clientX, y: e.clientY });
       setDragOrigin({ ...mapOffset });
-      window.addEventListener('mousemove', handleMapMouseMove as any);
-      window.addEventListener('mouseup', handleMapMouseUp as any);
     }
   };
-  const handleMapMouseMove = (e: MouseEvent) => {
+  const handleMapMouseMove = (e: React.MouseEvent) => {
     if (!isDragging || !dragStart || !dragOrigin) return;
     const dx = e.clientX - dragStart.x;
     const dy = e.clientY - dragStart.y;
     setMapOffset({ x: dragOrigin.x + dx, y: dragOrigin.y + dy });
   };
-  const handleMapMouseUp = (e: MouseEvent) => {
-    if (e.button === 2) {
+  const handleMapMouseUp = (e: React.MouseEvent) => {
+    if (e.button === 2 && isDragging) {
       setIsDragging(false);
       setDragStart(null);
       setDragOrigin(null);
-      window.removeEventListener('mousemove', handleMapMouseMove as any);
-      window.removeEventListener('mouseup', handleMapMouseUp as any);
     }
   };
   const handleMapClick = (e: React.MouseEvent) => {
@@ -466,6 +462,8 @@ const ScenarioEditor: React.FC = () => {
             <div className="map-container" ref={mapContainerRef}>              <div 
                 className={`map-canvas ${isDragging ? 'dragging' : ''}`}
                 onMouseDown={handleMapMouseDown}
+                onMouseMove={handleMapMouseMove}
+                onMouseUp={handleMapMouseUp}
                 onContextMenu={e => e.preventDefault()}
                 onWheel={handleMapWheel} // 확대/축소 핸들러 추가
                 style={{
