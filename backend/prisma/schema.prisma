@@ -1,0 +1,201 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// 사용자 정보
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  username      String    @unique
+  password      String
+  avatar        String?
+  rank          String?
+  level         Int       @default(1)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLoginAt   DateTime?
+
+  // 관계
+  scenarios     Scenario[]
+  sharedScenarios ScenarioShare[]
+  
+  @@map("users")
+}
+
+// 시나리오 정보
+model Scenario {
+  id            String    @id @default(cuid())
+  title         String
+  description   String?
+  mapId         String    // 맵 ID (abyss, ascent, bind 등)
+  mapName       String    // 맵 이름
+  isPublic      Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // 작성자
+  authorId      String
+  author        User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  
+  // 팀 구성
+  teams         TeamComposition[]
+  
+  // 타임라인
+  timeline      Timeline?
+  
+  // 맵 오브젝트 (스파이크, 벽, 스모크 등)
+  mapObjects    MapObject[]
+  
+  // 공유 설정
+  shares        ScenarioShare[]
+  
+  @@map("scenarios")
+}
+
+// 팀 구성 정보
+model TeamComposition {
+  id          String   @id @default(cuid())
+  scenarioId  String
+  scenario    Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  
+  teamType    String   // "our" | "enemy"
+  agentName   String   // 요원 이름
+  agentRole   String   // 요원 역할 (Duelist, Controller, Initiator, Sentinel)
+  position    Int      // 팀 내 순서
+  
+  // 플레이어 정보
+  playerActions PlayerAction[]
+  
+  @@map("team_compositions")
+}
+
+// 타임라인 정보
+model Timeline {
+  id          String   @id @default(cuid())
+  scenarioId  String   @unique
+  scenario    Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  
+  duration    Int      // 밀리초 단위
+  rounds      Int      @default(1)
+  
+  // 타임라인 이벤트들
+  events      TimelineEvent[]
+  
+  @@map("timelines")
+}
+
+// 타임라인 이벤트
+model TimelineEvent {
+  id          String   @id @default(cuid())
+  timelineId  String
+  timeline    Timeline @relation(fields: [timelineId], references: [id], onDelete: Cascade)
+  
+  timestamp   Int      // 밀리초 단위
+  eventType   String   // "movement", "skill", "spike", "death" 등
+  description String?
+  
+  // 이벤트 데이터 (JSON)
+  data        String   // JSON 형태로 저장
+  
+  @@map("timeline_events")
+}
+
+// 플레이어 액션 (이동, 스킬 사용 등)
+model PlayerAction {
+  id              String          @id @default(cuid())
+  teamCompositionId String
+  teamComposition TeamComposition @relation(fields: [teamCompositionId], references: [id], onDelete: Cascade)
+  
+  timestamp       Int             // 밀리초 단위
+  actionType      String          // "move", "skill", "shoot", "plant", "defuse" 등
+  
+  // 위치 정보
+  positionX       Float?
+  positionY       Float?
+  targetX         Float?
+  targetY         Float?
+  
+  // 스킬 정보
+  skillId         String?
+  skillName       String?
+  
+  // 추가 데이터
+  data            String?         // JSON 형태
+  
+  @@map("player_actions")
+}
+
+// 맵 오브젝트 (스파이크, 벽, 스모크, 플래시 등)
+model MapObject {
+  id          String   @id @default(cuid())
+  scenarioId  String
+  scenario    Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  
+  objectType  String   // "spike", "wall", "smoke", "flash", "molly" 등
+  objectName  String?  // 오브젝트 이름
+  
+  // 위치 정보
+  positionX   Float
+  positionY   Float
+  width       Float?
+  height      Float?
+  radius      Float?   // 원형 오브젝트용
+  
+  // 시각적 속성
+  color       String?
+  opacity     Float?   @default(1.0)
+  
+  // 시간 정보
+  startTime   Int?     // 나타나는 시간
+  endTime     Int?     // 사라지는 시간
+  duration    Int?     // 지속 시간
+  
+  // 추가 데이터
+  data        String?  // JSON 형태
+  
+  @@map("map_objects")
+}
+
+// 시나리오 공유
+model ScenarioShare {
+  id          String   @id @default(cuid())
+  scenarioId  String
+  scenario    Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  permission  String   // "view", "edit"
+  createdAt   DateTime @default(now())
+  
+  @@unique([scenarioId, userId])
+  @@map("scenario_shares")
+}
+
+// 맵 정보 (정적 데이터)
+model Map {
+  id          String @id // "abyss", "ascent" 등
+  name        String
+  displayName String
+  imageUrl    String
+  viewImageUrl String?
+  width       Int
+  height      Int
+  
+  // 맵 특성 (JSON 문자열로 저장)
+  sites       String // JSON 배열로 저장 ["A", "B", "C"]
+  callouts    String // JSON 배열로 저장
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("maps")
+}
