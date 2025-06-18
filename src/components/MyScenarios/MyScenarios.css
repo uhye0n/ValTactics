@@ -1,7 +1,7 @@
 .my-scenarios-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 80px 20px 20px 20px;
   color: white;
 }
 
@@ -11,7 +11,6 @@
   align-items: center;
   margin-bottom: 30px;
   padding-bottom: 20px;
-  border-bottom: 2px solid #ff4655;
 }
 
 .my-scenarios-header h1 {
@@ -141,6 +140,7 @@
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  z-index: 1;
 }
 
 .scenario-card:hover {
@@ -167,6 +167,39 @@
 
 .scenario-status {
   flex-shrink: 0;
+}
+
+.scenario-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.delete-button {
+  background: rgba(255, 70, 85, 0.2);
+  border: 1px solid #ff4655;
+  color: #ff4655;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  padding: 0;
+  line-height: 1;
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+}
+
+.delete-button:hover {
+  background: rgba(255, 70, 85, 0.4);
+  border-color: #ff6b7a;
+  color: #ff6b7a;
 }
 
 .status-badge {

@@ -219,7 +219,34 @@ router.post('/', async (req: any, res) => {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: '입력 데이터가 올바르지 않습니다.', details: error.errors })
     }
-    res.status(500).json({ error: '시나리오 생성에 실패했습니다.' })
+    res.status(500).json({ error: '시나리오 생성에 실패했습니다.' })  }
+})
+
+// 시나리오 삭제 (임시로 인증 없이)
+router.delete('/:id', async (req: any, res: any) => {
+  try {
+    const scenarioId = req.params.id;
+    console.log('시나리오 삭제 요청:', scenarioId);
+    
+    // 시나리오 존재 확인
+    const scenario = await prisma.scenario.findUnique({
+      where: { id: scenarioId }
+    });
+    
+    if (!scenario) {
+      return res.status(404).json({ error: '시나리오를 찾을 수 없습니다.' });
+    }
+    
+    // 관련 데이터와 함께 시나리오 삭제
+    await prisma.scenario.delete({
+      where: { id: scenarioId }
+    });
+    
+    console.log('시나리오 삭제 성공:', scenarioId);
+    res.json({ message: '시나리오가 성공적으로 삭제되었습니다.' });
+  } catch (error) {
+    console.error('Error deleting scenario:', error);
+    res.status(500).json({ error: '시나리오 삭제에 실패했습니다.' });
   }
 })
 

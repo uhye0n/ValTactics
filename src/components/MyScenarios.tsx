@@ -17,23 +17,19 @@ interface Scenario {
 
 const MyScenarios: React.FC = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
-  const [scenarios, setScenarios] = useState<Scenario[]>([]);
+  const navigate = useNavigate();  const [scenarios, setScenarios] = useState<Scenario[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>('');
-  const [searchTerm, setSearchTerm] = useState('');
 
   // 시나리오 목록 가져오기
   useEffect(() => {
     loadMyScenarios();
   }, []);
-
   const loadMyScenarios = async () => {
     try {
       setIsLoading(true);
       setError('');
-        const response = await apiService.getMyScenarios({
-        search: searchTerm,
+      const response = await apiService.getMyScenarios({
         limit: 20
       }) as any;
       
@@ -44,16 +40,28 @@ const MyScenarios: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
+  };  // 시나리오 삭제
+  const handleDeleteScenario = async (scenarioId: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // 카드 클릭 이벤트 방지
+    e.preventDefault();
+    
+    console.log('삭제 버튼 클릭됨:', scenarioId);
+    
+    if (!confirm('정말로 이 시나리오를 삭제하시겠습니까?')) {
+      console.log('삭제 취소됨');
+      return;
+    }
+
+    try {
+      console.log('시나리오 삭제 시도:', scenarioId);
+      await apiService.deleteScenario(scenarioId);
+      console.log('시나리오 삭제 성공');
+      setScenarios(prev => prev.filter(scenario => scenario.id !== scenarioId));
+    } catch (error: any) {
+      console.error('시나리오 삭제 실패:', error);
+      setError('시나리오 삭제에 실패했습니다.');
+    }
   };
-
-  // 검색어 변경 시 다시 로드
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      loadMyScenarios();
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
 
   const handleScenarioClick = (scenarioId: string) => {
     navigate(`/editor/${scenarioId}`);
@@ -97,21 +105,7 @@ const MyScenarios: React.FC = () => {
       </div>
     );
   }
-
-  return (
-    <div className="my-scenarios-container">
-      <div className="my-scenarios-header">
-        <h1>내 시나리오</h1>
-        <div className="search-container">
-          <input
-            type="text"
-            placeholder="시나리오 검색..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-input"
-          />
-        </div>
-      </div>
+  return (    <div className="my-scenarios-container">
 
       {error && (
         <div className="error-message">
@@ -143,15 +137,23 @@ const MyScenarios: React.FC = () => {
               key={scenario.id} 
               className="scenario-card"
               onClick={() => handleScenarioClick(scenario.id)}
-            >
-              <div className="scenario-header">
+            >              <div className="scenario-header">
                 <h3 className="scenario-title">{scenario.title}</h3>
-                <div className="scenario-status">
-                  {scenario.isPublic ? (
-                    <span className="status-badge public">공개</span>
-                  ) : (
-                    <span className="status-badge private">비공개</span>
-                  )}
+                <div className="scenario-actions">
+                  <div className="scenario-status">
+                    {scenario.isPublic ? (
+                      <span className="status-badge public">공개</span>
+                    ) : (
+                      <span className="status-badge private">비공개</span>
+                    )}
+                  </div>
+                  <button 
+                    className="delete-button"
+                    onClick={(e) => handleDeleteScenario(scenario.id, e)}
+                    aria-label="시나리오 삭제"
+                  >
+                    ×
+                  </button>
                 </div>
               </div>
               
