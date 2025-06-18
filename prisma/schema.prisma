@@ -1,0 +1,127 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // 또는 "sqlite" for development
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  username  String   @unique
+  password  String
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  scenarios Scenario[]
+  sessions  Session[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model Scenario {
+  id          String     @id @default(cuid())
+  title       String
+  description String?
+  mapId       String
+  isPublic    Boolean    @default(false)
+  tags        String[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  createdBy   String
+
+  // Relations
+  user      User       @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  players   Player[]
+  actions   Action[]
+  timeline  Timeline?
+
+  @@map("scenarios")
+}
+
+model Player {
+  id         String @id @default(cuid())
+  name       String
+  agent      String
+  team       Team
+  color      String
+  scenarioId String
+
+  // Relations
+  scenario Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  actions  Action[]
+
+  @@map("players")
+}
+
+model Action {
+  id         String     @id @default(cuid())
+  type       ActionType
+  positionX  Float
+  positionY  Float
+  timestamp  Int
+  metadata   Json?
+  playerId   String
+  scenarioId String
+
+  // Relations
+  player   Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  scenario Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+
+  @@map("actions")
+}
+
+model Timeline {
+  id           String @id @default(cuid())
+  duration     Int
+  currentTime  Int    @default(0)
+  isPlaying    Boolean @default(false)
+  playbackSpeed Float  @default(1.0)
+  scenarioId   String @unique
+
+  // Relations
+  scenario Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+
+  @@map("timelines")
+}
+
+enum Team {
+  attack
+  defense
+}
+
+enum ActionType {
+  move
+  crouch_move
+  run
+  ability_1
+  ability_2
+  ability_3
+  ultimate
+  shoot
+  aim
+  reload
+  melee
+  plant
+  defuse
+  peek
+  hide
+}

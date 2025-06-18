@@ -1,0 +1,163 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 사용자 모델
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  username  String   @unique
+  password  String
+  name      String?
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // 관계
+  scenarios Scenario[]
+  
+  @@map("users")
+}
+
+// 시나리오 모델
+model Scenario {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  mapId       String
+  isPublic    Boolean  @default(false)
+  tags        String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // 메타데이터
+  roundType   RoundType @default(FULL_BUY)
+  gameMode    GameMode  @default(COMPETITIVE)
+  version     String?
+  
+  // 타임라인
+  duration      Int     @default(120000) // 밀리초
+  currentTime   Int     @default(0)
+  playbackSpeed Float   @default(1.0)
+  
+  // 관계
+  createdBy String
+  user      User            @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  players   ScenarioPlayer[]
+  actions   PlayerAction[]
+  
+  @@map("scenarios")
+}
+
+// 시나리오별 플레이어
+model ScenarioPlayer {
+  id         String @id @default(cuid())
+  name       String
+  agent      String
+  team       Team
+  color      String
+  
+  // 관계
+  scenarioId String
+  scenario   Scenario       @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  actions    PlayerAction[]
+  
+  @@map("scenario_players")
+}
+
+// 플레이어 액션
+model PlayerAction {
+  id        String     @id @default(cuid())
+  timestamp Int        // 밀리초
+  type      ActionType
+  
+  // 위치 정보
+  positionX Float
+  positionY Float
+  rotation  Float?
+  
+  // 추가 데이터 (JSON)
+  data      Json?
+  
+  // 관계
+  playerId String
+  player   ScenarioPlayer @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  
+  scenarioId String
+  scenario   Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  
+  @@map("player_actions")
+}
+
+// 맵 정보
+model Map {
+  id           String @id @default(cuid())
+  name         String @unique
+  imageUrl     String
+  viewImageUrl String
+  width        Int
+  height       Int
+  
+  callouts MapCallout[]
+  
+  @@map("maps")
+}
+
+// 맵 콜아웃
+model MapCallout {
+  id       String @id @default(cuid())
+  name     String
+  
+  // 위치
+  positionX Float
+  positionY Float
+  
+  // 영역
+  areaX     Float
+  areaY     Float
+  areaWidth Float
+  areaHeight Float
+  
+  // 관계
+  mapId String
+  map   Map    @relation(fields: [mapId], references: [id], onDelete: Cascade)
+  
+  @@map("map_callouts")
+}
+
+// Enums
+enum Team {
+  ATTACK
+  DEFENSE
+}
+
+enum ActionType {
+  MOVE
+  SKILL
+  SHOOT
+  PLANT
+  DEFUSE
+  DEATH
+  REVIVE
+}
+
+enum RoundType {
+  PISTOL
+  ECO
+  FORCE_BUY
+  FULL_BUY
+}
+
+enum GameMode {
+  COMPETITIVE
+  UNRATED
+  CUSTOM
+}

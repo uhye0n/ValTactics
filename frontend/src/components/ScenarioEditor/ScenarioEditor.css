@@ -1,0 +1,275 @@
+.scenario-editor {
+  min-height: 100vh;
+  background: #0f1419;
+  color: white;
+  display: flex;
+  flex-direction: column;
+}
+
+.scenario-editor.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-spinner {
+  text-align: center;
+  color: #666;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #333;
+  border-top: 3px solid #007acc;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 헤더 */
+.scenario-editor-header {
+  background: #1a1a2e;
+  padding: 16px 24px;
+  border-bottom: 1px solid #333;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.back-button {
+  background: #333;
+  color: white;
+  border: 1px solid #555;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.back-button:hover {
+  background: #444;
+  border-color: #666;
+}
+
+.scenario-editor-header h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.map-name {
+  font-size: 14px;
+  color: #007acc;
+  font-weight: 500;
+}
+
+.header-right {
+  display: flex;
+  gap: 12px;
+}
+
+.save-button {
+  background: #007acc;
+  color: white;
+  border: 1px solid #007acc;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.save-button:hover {
+  background: #0066aa;
+  border-color: #0066aa;
+}
+
+/* 도구 모음 */
+.toolbar {
+  background: #16213e;
+  padding: 12px 24px;
+  border-bottom: 1px solid #333;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tool-group {
+  display: flex;
+  gap: 8px;
+}
+
+.tool-button {
+  background: #333;
+  color: white;
+  border: 1px solid #555;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 70px;
+  justify-content: center;
+}
+
+.tool-button:hover {
+  background: #444;
+  border-color: #666;
+}
+
+.tool-button.active {
+  background: #007acc;
+  border-color: #007acc;
+  color: white;
+}
+
+.tool-icon {
+  font-size: 16px;
+}
+
+.playback-info {
+  font-size: 12px;
+  color: #aaa;
+  font-family: 'Courier New', monospace;
+}
+
+/* 메인 컨텐츠 */
+.scenario-editor-content {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 280px 1fr 320px;
+  grid-template-rows: 1fr auto;
+  gap: 16px;
+  padding: 16px;
+  height: calc(100vh - 80px); /* 헤더 높이만 제외 */
+}
+
+.left-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+}
+
+.map-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0; /* 그리드 아이템이 제대로 축소되도록 */
+}
+
+.right-panel-container {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.timeline-container {
+  grid-column: 1 / -1;
+  min-height: 200px;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1200px) {
+  .scenario-editor-content {
+    grid-template-columns: 250px 1fr 280px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .scenario-editor-content {
+    grid-template-columns: 1fr 300px;
+    grid-template-rows: auto auto auto;
+    height: auto;
+  }
+  
+  .left-panel {
+    order: 2;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: visible;
+  }
+  
+  .map-container {
+    order: 1;
+    grid-column: 1 / -1;
+  }
+  
+  .right-panel-container {
+    order: 2;
+  }
+  
+  .timeline-container {
+    order: 3;
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .scenario-editor-header {
+    padding: 12px 16px;
+  }
+  
+  .header-left {
+    gap: 12px;
+  }
+  
+  .scenario-editor-header h1 {
+    font-size: 20px;
+  }
+  
+  .toolbar {
+    padding: 8px 16px;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .tool-group {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .scenario-editor-content {
+    padding: 12px;
+    gap: 12px;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto auto;
+  }
+  
+  .left-panel {
+    flex-direction: column;
+    order: 3;
+  }
+  
+  .map-container {
+    order: 1;
+  }
+  
+  .right-panel-container {
+    order: 2;
+  }
+  
+  .timeline-container {
+    order: 4;
+  }
+}

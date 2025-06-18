@@ -1,0 +1,1286 @@
+@import url("https://fonts.googleapis.com/css2?family=Gajraj+One:wght@400&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Fascinate:wght@400&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Akshar:wght@700&display=swap");
+
+:root {
+  --color-primary-red: #ff2736;
+  --color-primary-red-hover: #ff4757;
+  --color-logo-red: #fc4754;
+
+  --panel-width: 220px;
+  --panel-height: 60px;
+  --panel-font-size: 36px;
+  --panel-font-size-highlighted: 50px;
+  --panel-letter-spacing: 0.02em;
+  --panel-line-height: 1;
+  --panel-left-position: 8rem; /* 패널을 오른쪽으로 이동 (4rem -> 8rem) */
+  --scenario-card-width: 260px; /* 크기 축소 */
+  --scenario-card-height: 180px; /* 크기 축소 */
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* 스크롤바 활성화 */
+  overflow-x: auto;
+  overflow-y: auto;
+}
+
+.app {
+  min-height: 100vh;
+  min-width: 1400px; /* 최소 가로 크기 증가 (패널 + 로고 + 시나리오 카드들이 여유롭게) */
+  width: 100%;
+}
+
+.app__background {
+  position: relative;
+  width: 100%;
+  min-height: 100vh; /* height -> min-height로 변경 */
+  min-width: 1400px; /* 최소 가로 크기 증가 */
+  /* overflow: hidden 제거하여 스크롤바 활성화 */
+}
+
+/* Header Styles */
+.header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 50;
+}
+
+.header__container {
+  display: flex;
+  align-items: center;
+  padding: 3rem 4rem;
+  min-width: 1400px; /* 최소 가로 크기 증가 */
+  height: auto; /* 일정한 높이 유지 */
+}
+
+.header__spacer {
+  flex: 1;
+  min-width: 200px; /* 최소 공간 보장 */
+}
+
+.header__logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-width: 200px;
+  min-height: 80px;
+  padding: 16px 0; /* 상하 패딩 추가 */
+}
+
+.logo {
+  font-family: "Gajraj One", sans-serif;
+  font-size: 1.875rem;
+  line-height: 1.2;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin: 0;
+  margin-bottom: 0; /* 하단 마진 제거 */
+}
+
+.logo:hover {
+  transform: translateY(-2px) scale(1.03);
+  text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+}
+
+.logo__highlight {
+  color: var(--color-logo-red);
+}
+
+.logo__text {
+  color: white;
+}
+
+.header__auth {
+  display: flex;
+  justify-content: flex-end;
+  flex: 1;
+  align-items: center; /* flex-start에서 center로 변경 */
+  min-width: 200px; /* 로그인 영역 최소 크기 보장 */
+}
+
+.auth-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 80px; /* 고정된 높이로 일관성 확보 */
+  justify-content: center; /* 다시 center로 변경 */
+  position: relative;
+}
+
+.auth-button {
+  font-family: "Akshar", sans-serif;
+  color: white;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 18px;
+  transition: all 0.3s ease;
+  border: none;
+  background: none;
+  padding: 8px 12px;
+  margin: 0;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-button:hover {
+  color: var(--color-primary-red-hover);
+  transform: translateY(-2px) scale(1.03);
+  text-shadow: 0 0 15px rgba(255, 39, 54, 0.3);
+}
+
+.text-underline {
+  position: relative;
+  /* margin-top 제거 - 각 클래스에서 개별 설정 */
+}
+
+.text-underline--logo {
+  width: 150px;
+  margin-top: 12px; /* 8px에서 12px로 증가 */
+}
+
+.text-underline--auth {
+  width: 60px;
+  position: relative;
+  margin-top: 0px; /* 2px에서 0px로 변경 (2px 더 위로 올림) */
+}
+
+.text-underline__main {
+  position: absolute;
+  height: 0px;
+  width: 100%;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  border: 1px solid #8a98a2;
+}
+
+.text-underline__accent {
+  position: absolute;
+  height: 0px;
+  width: 2.2px;
+  top: 0;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.text-underline__accent--left {
+  left: 0;
+}
+
+.text-underline__accent--right {
+  right: 0;
+}
+
+/* Navigation Styles */
+.panel-navigation {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.panel-navigation__container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.panel-item {
+  display: flex;
+  align-items: center;
+  pointer-events: auto;
+  width: var(--panel-width);
+  height: var(--panel-height);
+  min-height: var(--panel-height);
+}
+
+.panel-item__indicator {
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: white;
+  transform: rotate(45deg);
+  flex-shrink: 0;
+  margin-right: 16px;
+  transition: all 0.3s ease;
+}
+
+.panel-item__button {
+  font-family: "Fascinate", sans-serif;
+  font-style: normal;
+  font-weight: 900;
+  font-size: var(--panel-font-size);
+  line-height: var(--panel-line-height);
+  letter-spacing: var(--panel-letter-spacing);
+  font-variant: all-small-caps;
+  color: #ffffff;
+  transition: all 0.3s ease;
+  text-align: left;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  white-space: nowrap;
+  display: block;
+  transform: translateY(-2px);
+}
+
+.panel-item__button:hover {
+  color: var(--color-primary-red-hover);
+  transform: translateY(-2px) scale(1.03);
+  text-shadow: 0 0 15px rgba(255, 39, 54, 0.3);
+}
+
+.panel-item__button--highlighted {
+  color: var(--color-primary-red);
+  font-size: var(--panel-font-size-highlighted);
+  transform: translateY(-3px);
+  transition: all 0.3s ease;
+}
+
+.panel-item__button--highlighted:hover {
+  color: var(--color-primary-red-hover);
+  transform: translateY(-3px) scale(1.05);
+  text-shadow: 0 0 20px rgba(255, 39, 54, 0.5);
+}
+
+.panel-item:has(.panel-item__button:not(.panel-item__button--highlighted):hover) .panel-item__indicator {
+  transform: rotate(45deg) scale(1.15);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+}
+
+.panel-item:has(.panel-item__button--highlighted:hover) .panel-item__indicator {
+  transform: rotate(45deg) scale(1.2);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
+}
+
+/* Popular Scenarios Styles */
+.popular-scenarios {
+  position: absolute;
+  right: 2rem; /* 우측 여백 줄임 */
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+}
+
+.popular-scenarios__container {
+  width: fit-content;
+  min-width: 540px; /* 축소된 카드 크기에 맞춤 (260px * 2 + 간격) */
+}
+
+.popular-scenarios__grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(2, 260px); /* 축소된 카드 크기 적용 */
+  grid-template-rows: repeat(2, 180px); /* 축소된 높이 적용 */
+  min-width: 540px; /* 축소된 최소 크기 (260px * 2 + 20px gap) */
+  min-height: 372px; /* 축소된 최소 세로 크기 (180px * 2 + 12px gap) */
+}
+
+.scenario-card {
+  background-color: #d1d5db;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  width: 260px; /* 축소된 크기 */
+  height: 180px; /* 축소된 크기 */
+}
+
+.scenario-card:hover {
+  background-color: #e5e7eb;
+}
+
+.scenario-card__content {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scenario-card:nth-child(n + 5) {
+  display: none;
+}
+
+@media (min-width: 1200px) {
+  .popular-scenarios {
+    right: 6rem; /* 좌측으로 이동하기 위해 여백 증가 */
+    min-width: 810px; /* 3x2 그리드에 맞춘 크기 */
+  }
+  
+  .popular-scenarios__container {
+    min-width: 810px; /* 3x2 그리드에 맞춘 크기 */
+  }
+  
+  .popular-scenarios__grid {
+    grid-template-columns: repeat(3, 260px); /* 기존 카드 크기 유지 */
+    grid-template-rows: repeat(2, 180px); /* 기존 높이 유지 */
+    gap: 0.75rem; /* 동일한 간격 유지 */
+    min-width: 810px; /* 그리드 최소 크기 조정 */
+    min-height: 372px; /* 기존 세로 크기 유지 */
+  }
+
+  .scenario-card {
+    width: 260px; /* 기존 카드 크기 유지 */
+    height: 180px; /* 기존 카드 높이 유지 */
+  }
+
+  .scenario-card:nth-child(n + 5) {
+    display: block;
+  }
+}
+
+/* 중간 크기 화면에서 중앙으로 이동 */
+@media (max-width: 1199px) {
+  .popular-scenarios {
+    right: 50%;
+    transform: translate(50%, -50%); /* 중앙 정렬 */
+  }
+  
+  .popular-scenarios__container {
+    min-width: 540px; /* 2x2 그리드에 맞춘 크기 */
+  }
+  
+  .popular-scenarios__grid {
+    grid-template-columns: repeat(2, 260px); /* 2x2 그리드 */
+    grid-template-rows: repeat(2, 180px);
+    min-width: 540px;
+    min-height: 372px;
+  }
+
+  .scenario-card {
+    width: 260px; /* 기본 카드 크기 유지 */
+    height: 180px; /* 기본 카드 높이 유지 */
+  }
+  
+  .scenario-card:nth-child(n + 5) {
+    display: none; /* 5, 6번째 카드 숨김 */
+  }
+}
+
+/* User Info Styles */
+.user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.user-info__name {
+  font-family: "Akshar", sans-serif;
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.05em;
+  text-align: center;
+}
+
+/* Auth Modal Styles */
+.auth-modal {
+  max-width: 480px !important;
+  min-width: 450px !important;
+  background: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: white;
+  z-index: 100001 !important;
+  position: relative !important;
+  padding: 2rem !important;
+}
+
+.auth-modal__title {
+  font-family: "Akshar", sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--color-primary-red);
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.auth-modal__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.auth-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.auth-modal__label {
+  font-family: "Akshar", sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: white;
+  letter-spacing: 0.02em;
+}
+
+.auth-modal__submit {
+  background: var(--color-primary-red);
+  color: white;
+  font-family: "Akshar", sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.05em;
+  padding: 12px 24px;
+  min-height: 48px;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 0.5rem;
+}
+
+.auth-modal__submit:hover:not(:disabled) {
+  background: var(--color-primary-red-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(255, 39, 54, 0.3);
+}
+
+.auth-modal__submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.auth-modal__error {
+  background: rgba(220, 38, 127, 0.1);
+  border: 1px solid rgba(220, 38, 127, 0.3);
+  color: #fecaca;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 14px;
+  text-align: center;
+  font-family: "Akshar", sans-serif;
+  margin-bottom: 1rem;
+}
+
+.auth-modal__switch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.auth-modal__switch-text {
+  font-family: "Akshar", sans-serif;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.auth-modal__switch-button {
+  font-family: "Akshar", sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--color-primary-red);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.auth-modal__switch-button:hover:not(:disabled) {
+  color: var(--color-primary-red-hover);
+  transform: scale(1.05);
+}
+
+.auth-modal__switch-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.auth-modal__demo {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.auth-modal__demo-text {
+  font-family: "Akshar", sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--color-primary-red);
+  margin-bottom: 0.5rem;
+}
+
+.auth-modal__demo-info {
+  font-family: "Akshar", sans-serif;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.4;
+}
+
+/* Input overrides for auth modal */
+.auth-modal [data-slot="input"] {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  font-family: "Akshar", sans-serif;
+  padding: 12px 16px;
+  font-size: 16px;
+  min-height: 48px;
+}
+
+.auth-modal [data-slot="input"]:focus {
+  border-color: var(--color-primary-red);
+  box-shadow: 0 0 0 3px rgba(255, 39, 54, 0.1);
+}
+
+.auth-modal [data-slot="input"]::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Dialog overlay customization */
+[data-slot="dialog-content"] {
+  z-index: 100000 !important;
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+}
+
+[data-slot="dialog-overlay"] {
+  z-index: 99999 !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  backdrop-filter: blur(4px) !important;
+  background: rgba(0, 0, 0, 0.85) !important;
+}
+
+/* Hide any remaining default dialog close buttons */
+.auth-modal [data-radix-dialog-close]:not(.auth-modal__close-button) {
+  display: none !important;
+}
+
+/* Checkbox styles */
+.auth-modal__checkbox-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  cursor: pointer;
+  padding: 0.75rem 0;
+}
+
+.auth-modal__checkbox {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.auth-modal__checkbox:checked {
+  background: var(--color-primary-red);
+  border-color: var(--color-primary-red);
+}
+
+.auth-modal__checkbox:checked::before {
+  content: '✓';
+  display: block;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  text-align: center;
+  line-height: 16px;
+}
+
+.auth-modal__checkbox:hover:not(:disabled) {
+  border-color: var(--color-primary-red);
+  box-shadow: 0 0 8px rgba(255, 39, 54, 0.3);
+}
+
+.auth-modal__checkbox:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.auth-modal__checkbox-text {
+  font-family: "Akshar", sans-serif;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.4;
+  user-select: none;
+}
+
+.auth-modal__required {
+  color: var(--color-primary-red);
+  font-weight: bold;
+}
+
+/* UserMenu Styles */
+.user-menu {
+  position: relative;
+  display: inline-block;
+  min-height: 48px; /* 로그인 버튼과 동일한 높이 */
+  display: flex;
+  align-items: center;
+}
+
+.user-menu__trigger {
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: white;
+  font-family: inherit;
+  min-width: 160px;
+}
+
+.user-menu__trigger:hover {
+  background: rgba(0, 0, 0, 0.9);
+  border-color: var(--color-primary-red);
+  transform: translateY(-1px);
+}
+
+.user-menu__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--color-primary-red);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.user-menu__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.user-menu__avatar-text {
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.user-menu__info {
+  flex: 1;
+  text-align: left;
+  min-width: 0;
+}
+
+.user-menu__name {
+  display: block;
+  font-weight: 600;
+  font-size: 14px;
+  color: white;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-menu__rank {
+  display: block;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-menu__arrow {
+  color: rgba(255, 255, 255, 0.7);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.user-menu__overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100;
+}
+
+.user-menu__dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: rgba(0, 0, 0, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  padding: 16px;
+  min-width: 280px;
+  z-index: 101;
+  animation: dropdownSlide 0.2s ease-out;
+}
+
+@keyframes dropdownSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.user-menu__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.user-menu__header-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--color-primary-red);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.user-menu__header-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.user-menu__header-avatar-text {
+  color: white;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.user-menu__header-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.user-menu__header-name {
+  font-weight: 600;
+  font-size: 16px;
+  color: white;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-menu__header-email {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-menu__header-stats {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.user-menu__level {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.user-menu__rank-badge {
+  font-size: 12px;
+  color: var(--color-primary-red);
+  background: rgba(255, 39, 54, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.user-menu__divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 12px 0;
+}
+
+.user-menu__items {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.user-menu__item {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.8);
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: inherit;
+  font-size: 14px;
+  text-align: left;
+  width: 100%;
+}
+
+.user-menu__item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.user-menu__item--danger {
+  color: var(--color-primary-red);
+}
+
+.user-menu__item--danger:hover {
+  background: rgba(255, 39, 54, 0.1);
+  color: var(--color-primary-red-hover);
+}
+
+.user-menu__item svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* Auth Modal Close Button Styles */
+.auth-modal__close-button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  transition: all 0.2s ease;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+.auth-modal__close-button:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.05);
+}
+
+.auth-modal__close-button:active {
+  transform: scale(0.95);
+}
+
+.auth-modal__close-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Profile Edit Modal Styles */
+.profile-edit-modal {
+  max-width: 420px;
+  width: 90vw;
+  background: rgba(18, 18, 18, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  color: white;
+  padding: 2rem;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.profile-edit-modal__close-button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  transition: all 0.2s ease;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+.profile-edit-modal__close-button:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.05);
+}
+
+.profile-edit-modal__close-button:active {
+  transform: scale(0.95);
+}
+
+.profile-edit-modal__close-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+.profile-edit-modal__title {
+  font-family: "Akshar", sans-serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: white;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, #ff2736, #ff4757);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.profile-edit-modal__error {
+  background: rgba(255, 39, 54, 0.1);
+  border: 1px solid rgba(255, 39, 54, 0.3);
+  color: var(--color-primary-red);
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-size: 14px;
+  text-align: center;
+}
+
+.profile-edit-modal__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.profile-edit-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.profile-edit-modal__label {
+  font-family: "Akshar", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 4px;
+}
+
+.profile-edit-modal__avatar-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.profile-edit-modal__avatar-preview {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--color-primary-red);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.profile-edit-modal__avatar-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-edit-modal__avatar-text {
+  color: white;
+  font-weight: bold;
+  font-size: 28px;
+}
+
+.profile-edit-modal__avatar-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.profile-edit-modal__file-input {
+  display: none;
+}
+
+.profile-edit-modal__avatar-button {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: "Akshar", sans-serif;
+  font-weight: 500;
+}
+
+.profile-edit-modal__avatar-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: var(--color-primary-red);
+  transform: translateY(-1px);
+}
+
+.profile-edit-modal__avatar-button--remove {
+  background: rgba(255, 39, 54, 0.1);
+  border-color: rgba(255, 39, 54, 0.3);
+  color: var(--color-primary-red);
+}
+
+.profile-edit-modal__avatar-button--remove:hover {
+  background: rgba(255, 39, 54, 0.2);
+  border-color: var(--color-primary-red);
+}
+
+.profile-edit-modal__select {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: white;
+  font-family: "Akshar", sans-serif;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 12px center;
+  background-repeat: no-repeat;
+  background-size: 16px;
+  padding-right: 40px;
+}
+
+.profile-edit-modal__select:focus {
+  outline: none;
+  border-color: var(--color-primary-red);
+  box-shadow: 0 0 0 3px rgba(255, 39, 54, 0.1);
+}
+
+.profile-edit-modal__select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.profile-edit-modal__select option {
+  background: #1a1a1a;
+  color: white;
+  padding: 8px;
+}
+
+.profile-edit-modal__actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.profile-edit-modal__cancel-button {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.8);
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-family: "Akshar", sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.profile-edit-modal__cancel-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.profile-edit-modal__submit {
+  flex: 1;
+  background: linear-gradient(135deg, var(--color-primary-red), var(--color-primary-red-hover));
+  border: none;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-family: "Akshar", sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 15px rgba(255, 39, 54, 0.3);
+}
+
+.profile-edit-modal__submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 39, 54, 0.4);
+}
+
+.profile-edit-modal__submit:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 10px rgba(255, 39, 54, 0.3);
+}
+
+.profile-edit-modal__submit:disabled,
+.profile-edit-modal__cancel-button:disabled,
+.profile-edit-modal__avatar-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Header back navigation styles */
+.header__back {
+  display: flex;
+  justify-content: flex-start;
+  flex: 1;
+  align-items: center;
+  min-width: 200px;
+}
+
+.back-nav-container {
+  display: flex;
+  align-items: center;
+  gap: 6px; /* 12px에서 6px로 줄임 */
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.back-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateX(-2px);
+}
+
+.back-icon {
+  width: 24px;
+  height: 32px;
+}
+
+.back-text {
+  font-family: 'Akshar', sans-serif;
+  font-weight: 500;
+  color: #797d7c;
+  font-size: 15px;
+  white-space: nowrap;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0px; /* 8px에서 0px로 완전히 제거 */
+  margin-left: -4px; /* 왼쪽으로 이동 */
+}
+
+.breadcrumb-arrow {
+  width: 12px; /* 8px에서 12px로 원래 크기로 복원 */
+  height: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 -2px; /* 음수 마진으로 겹치게 만들기 */
+  padding: 0; /* 패딩도 제거 */
+}
+
+.breadcrumb-arrow::before {
+  content: '';
+  width: 16px;
+  height: 0;
+  border-top: 2px solid white;
+  transform: rotate(111deg);
+}
+
+.breadcrumb-text {
+  font-family: 'Akshar', sans-serif;
+  font-weight: bold;
+  color: white;
+  font-size: 18px;
+  letter-spacing: 3.6px;
+  white-space: nowrap;
+  margin-left: 8px; /* 도형과 메인화면 사이의 거리를 벌리기 위해 추가 */
+}
+
+/* Responsive Design - Fixed layout for small screens */
+/* 화면이 최소 크기보다 작아지면 스크롤바 생성 */
+@media (max-width: 1199px) {
+  body {
+    overflow-x: auto; /* 가로 스크롤바 강제 활성화 */
+  }
+}
+
+@media (max-height: 800px) {
+  body {
+    overflow-y: auto; /* 세로 스크롤바 강제 활성화 */
+  }
+  
+  .app__background {
+    min-height: 800px; /* 최소 세로 크기 보장 */
+  }
+}

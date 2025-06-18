@@ -1,0 +1,598 @@
+/* NewScenario.css - Tailwind styles converted to CSS */
+
+/* Global scroll behavior for new scenario page */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  scroll-behavior: smooth;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  height: auto !important;
+  min-height: 100vh;
+}
+
+#root {
+  height: auto !important;
+  min-height: 100vh;
+}
+
+.new-scenario {
+  position: relative;
+  width: 100%;
+  min-width: 1400px; /* 메인 화면과 동일한 최소 가로 크기 설정 */
+  min-height: 200vh; /* 강제로 높은 높이 설정 */
+  /* 배경색은 app__background에서 처리하므로 제거 */
+}
+
+.new-scenario-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-repeat: no-repeat;
+  background-size: 103.45% 116.38%;
+  background-position: 0% 46.05%;
+  z-index: 1;
+  pointer-events: none; /* 배경이 스크롤을 방해하지 않도록 */
+}
+
+.new-scenario-content {
+  position: relative;
+  z-index: 10;
+  padding-top: 140px; /* 헤더 높이만큼 상단 패딩 추가 */
+  padding-bottom: 60px; /* 하단 여백 추가 */
+  min-height: calc(100vh + 1000px); /* 충분한 높이 확보로 스크롤 가능하게 */
+}
+
+/* Underline component */
+.underline-with-highlights {
+  position: relative;
+  height: 1px;
+  margin: 0 auto;
+}
+
+.underline-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Section headers */
+.section-header {
+  margin-bottom: 24px;
+}
+
+.section-title {
+  font-family: 'Fascinate', sans-serif;
+  color: white;
+  font-size: 20px;
+  margin-bottom: 16px;
+}
+
+/* Map Selection */
+.map-grid-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+  max-width: 100%;
+  margin-left: 60px; /* 오른쪽으로 이동 */
+}
+
+.map-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.map-grid-top {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.map-grid-bottom {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  /* 5개 카드가 6개 카드와 동일한 전체 너비를 차지하도록 조정 */
+  padding: 0 calc((100% / 6) * 0.5);
+}
+
+.map-card {
+  position: relative;
+  height: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  width: 100%;
+  min-width: 0; /* flex-shrink를 허용 */
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border: 1px solid rgba(135, 145, 155, 0.6);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.map-card:hover {
+  transform: scale(1.05) translateY(-2px);
+  border-color: #FFFFFF;
+  box-shadow: 0 8px 32px rgba(255, 255, 255, 0.15), 0 0 20px rgba(255, 255, 255, 0.1);
+  filter: brightness(1.05);
+}
+
+.map-card.selected {
+  border-color: #ff4757 !important;
+  box-shadow: 0 0 20px rgba(255, 71, 87, 0.5);
+  transform: scale(1.05) translateY(-2px);
+}
+
+.map-card-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-size: cover;
+  background-position: center;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.map-card:hover .map-card-background {
+  filter: brightness(1.25) contrast(1.1) saturate(1.1);
+  transform: scale(1.02);
+}
+
+.map-card-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.45) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.map-card:hover .map-card-overlay {
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0.25) 100%);
+}
+
+.map-card-name {
+  font-family: 'FONTSPRING DEMO - Anguita Sans Black', sans-serif;
+  color: white;
+  font-size: 18px;
+  line-height: 37px;
+  letter-spacing: 0.12em;
+  text-align: center;
+  font-weight: 900;
+  text-shadow: 0px 2px 12px rgba(0, 0, 0, 0.8), 0px 1px 24px rgba(255, 255, 255, 0.3);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform: translateZ(0);
+}
+
+.map-card:hover .map-card-name {
+  text-shadow: 0px 3px 16px rgba(0, 0, 0, 0.6), 0px 2px 28px rgba(255, 255, 255, 0.6);
+  transform: translateY(-1px);
+}
+
+.map-card.selected .map-card-name {
+  color: #ff4757;
+  text-shadow: 0 0 10px rgba(255, 71, 87, 0.8);
+}
+
+/* Agent Selection */
+.agent-grid-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.agent-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 29px;
+}
+
+.agent-profile {
+  width: 64px;
+  height: 64px;
+  border: 1px solid rgba(135, 145, 155, 0.8);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border-radius: 2px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.agent-profile:hover {
+  transform: scale(1.15) translateY(-3px);
+  border-color: #FFFFFF;
+  box-shadow: 0 8px 32px rgba(255, 255, 255, 0.2), 0 0 20px rgba(255, 255, 255, 0.15);
+  filter: brightness(1.05);
+}
+
+.agent-profile.selected {
+  border-color: #ff4757 !important;
+  box-shadow: 0 0 20px rgba(255, 71, 87, 0.5);
+  transform: scale(1.15) translateY(-3px);
+}
+
+.agent-profile.selected::after {
+  content: '✓';
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #ff4757;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.agent-profile-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-size: cover;
+  background-position: center;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.agent-profile:hover .agent-profile-image {
+  filter: brightness(1.15) contrast(1.1) saturate(1.05);
+  transform: scale(1.05);
+}
+
+/* Template Section */
+.template-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  margin-bottom: 24px;
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.template-card {
+  position: relative;
+  width: 220.15px;
+  height: 154.7px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.template-card:hover {
+  transform: scale(1.03) translateY(-2px);
+  box-shadow: 0 8px 32px rgba(255, 255, 255, 0.1), 0 0 20px rgba(255, 255, 255, 0.05);
+}
+
+.template-card-border {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  border: 0.595px solid #87919B;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+}
+
+.template-card:hover .template-card-border {
+  border-color: #FFFFFF;
+}
+
+.template-card-image {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.07;
+  transition: opacity 0.3s ease;
+}
+
+.template-card:hover .template-card-image {
+  opacity: 0.3;
+}
+
+.template-card-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 23.8px 18.45px 20px 18.45px;
+  z-index: 2;
+}
+
+.template-card-title {
+  font-family: 'Akshar', sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 15.47px;
+  line-height: 21px;
+  text-align: center;
+  letter-spacing: 0.12em;
+  color: #FFFFFF;
+  margin: 0;
+  margin-bottom: 10px;
+  width: 100%;
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+.template-card:hover .template-card-title {
+  color: #FFFFFF;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.template-card-underline-group {
+  position: relative;
+  width: 182.07px;
+  height: 1px;
+  margin: 0 auto 9.52px auto;
+}
+
+.template-card-line-main {
+  position: absolute;
+  width: 100%;
+  height: 0;
+  top: 0;
+  left: 0;
+  border-top: 0.595px solid #8A98A2;
+  transition: border-color 0.3s ease;
+}
+
+.template-card:hover .template-card-line-main {
+  border-color: #FFFFFF;
+}
+
+.template-card-line-left {
+  position: absolute;
+  width: 2.38px;
+  height: 0;
+  top: 0;
+  left: 0;
+  border-top: 0.595px solid rgba(255, 255, 255, 0.59);
+  transition: border-color 0.3s ease;
+}
+
+.template-card:hover .template-card-line-left {
+  border-color: rgba(255, 255, 255, 0.9);
+}
+
+.template-card-line-right {
+  position: absolute;
+  width: 2.38px;
+  height: 0;
+  top: 0;
+  right: 0;
+  border-top: 0.595px solid rgba(255, 255, 255, 0.6);
+  transition: border-color 0.3s ease;
+}
+
+.template-card:hover .template-card-line-right {
+  border-color: rgba(255, 255, 255, 0.9);
+}
+
+.template-card-agents {
+  font-family: 'Akshar', sans-serif;
+  font-style: normal;
+  font-weight: 300;
+  font-size: 11.9px;
+  line-height: 16px;
+  text-align: center;
+  letter-spacing: 0.06em;
+  color: #FFFFFF;
+  margin: 0;
+  flex: 1;
+  width: 182.67px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+.template-card:hover .template-card-agents {
+  color: #FFFFFF;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+}
+
+.template-card-diamond {
+  position: relative;
+  width: 12px;
+  height: 12px;
+  border: 1px solid #FFFFFF;
+  transform: rotate(45deg);
+  margin: 0 auto;
+  transition: all 0.3s ease;
+  background: transparent;
+}
+
+.template-card:hover .template-card-diamond {
+  border-color: #FFFFFF;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.3);
+}
+
+.template-card-crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-45deg);
+  width: 10px;
+  height: 10px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.template-card:hover .template-card-crosshair {
+  opacity: 1;
+}
+
+.template-card-corner {
+  position: absolute;
+  width: 1.19px;
+  height: 1.19px;
+  background: #D9D9D9;
+  z-index: 3;
+}
+
+.template-card-corner.top-left { 
+  top: -0.595px; 
+  left: -0.595px; 
+}
+
+.template-card-corner.top-right { 
+  top: -0.595px; 
+  right: -0.595px; 
+}
+
+.template-card-corner.bottom-left { 
+  bottom: -0.595px; 
+  left: -0.595px; 
+}
+
+.template-card-corner.bottom-right { 
+  bottom: -0.595px; 
+  right: -0.595px; 
+}
+
+/* Generate Button */
+.generate-button-container {
+  display: flex;
+  justify-content: center;
+}
+
+.generate-button {
+  position: relative;
+  width: 347px;
+  height: 66px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.generate-button:hover {
+  transform: scale(1.02) translateY(-2px);
+  box-shadow: 0 8px 32px rgba(117, 183, 179, 0.3), 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+.generate-button:active {
+  transform: scale(0.98) translateY(0px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: all 0.1s ease;
+}
+
+.generate-button-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 1px solid rgba(135, 145, 155, 0.8);
+  background: radial-gradient(ellipse 30.05px 16.452px at 41.5px 33px, rgba(117,183,179,1) 0%, rgba(87,137,134,1) 40.416%, rgba(102,169,164,1) 70.208%, rgba(116,201,193,1) 100%);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.generate-button:hover .generate-button-background {
+  border-color: #FFFFFF;
+  background: radial-gradient(ellipse 30.05px 16.452px at 41.5px 33px, rgba(137,203,199,1) 0%, rgba(107,157,154,1) 40.416%, rgba(122,189,184,1) 70.208%, rgba(136,221,213,1) 100%);
+  filter: brightness(1.1) saturate(1.1);
+}
+
+.generate-button:active .generate-button-background {
+  filter: brightness(0.9) saturate(1.2);
+}
+
+.generate-button-text {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'FONTSPRING DEMO - Anguita Sans Black', sans-serif;
+  font-weight: 900;
+  color: white;
+  font-size: 22px;
+  line-height: 1;
+  letter-spacing: 0.15em;
+  text-shadow: rgba(0,0,0,0.5) 0px 2px 4px;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  z-index: 2;
+  /* 폰트의 베이스라인 보정 */
+  transform: translateY(-1px);
+}
+
+.generate-button:hover .generate-button-text {
+  text-shadow: rgba(0,0,0,0.4) 0px 3px 6px, rgba(255,255,255,0.3) 0px 1px 2px;
+  transform: translateY(-2px);
+}
+
+.generate-button:active .generate-button-text {
+  transform: translateY(0px);
+}
+
+/* Layout utilities */
+.section-container {
+  width: 100%;
+  padding: 64px 0;
+}
+
+.section-container.header-spacing {
+  padding: 32px 0;
+}
+
+.section-container.compact-spacing {
+  padding: 32px 0;
+}
+
+.content-width {
+  width: 920px;
+  margin: 0 auto;
+  padding: 0 2rem; /* 좌우 여백 추가 */
+}
+
+/* Responsive Design - Fixed layout for small screens */
+/* 화면이 최소 크기보다 작아지면 스크롤바 생성 */
+@media (max-width: 1399px) {
+  html, body {
+    overflow-x: auto !important; /* 가로 스크롤바 강제 활성화 */
+  }
+  
+  .new-scenario {
+    min-width: 1400px; /* 최소 크기 유지 */
+  }
+}
+
+@media (max-height: 800px) {
+  html, body {
+    overflow-y: auto !important; /* 세로 스크롤바 강제 활성화 */
+  }
+  
+  .new-scenario {
+    min-height: 800px; /* 최소 세로 크기 보장 */
+  }
+}

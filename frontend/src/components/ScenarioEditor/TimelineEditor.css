@@ -1,0 +1,322 @@
+.timeline-editor {
+  background: #1a1a2e;
+  border-radius: 8px;
+  padding: 16px;
+  color: white;
+  height: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+.timeline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #333;
+}
+
+.timeline-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.timeline-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.zoom-button {
+  background: #333;
+  color: white;
+  border: 1px solid #555;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.zoom-button:hover {
+  background: #444;
+}
+
+.scale-indicator {
+  font-size: 12px;
+  color: #aaa;
+  min-width: 40px;
+  text-align: center;
+}
+
+.timeline-container {
+  flex: 1;
+  position: relative;
+  background: #0f1419;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.timeline-ruler {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  background: #16213e;
+  border-bottom: 1px solid #333;
+}
+
+.time-marker {
+  position: absolute;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.time-line {
+  width: 1px;
+  background: #555;
+  height: 15px;
+  margin-top: 5px;
+}
+
+.time-line.current {
+  background: #007acc;
+  height: 100%;
+  width: 2px;
+  margin-top: 0;
+}
+
+.time-label {
+  font-size: 10px;
+  color: #aaa;
+  margin-top: 2px;
+  white-space: nowrap;
+}
+
+.current-time-indicator {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.time-handle {
+  position: absolute;
+  top: -4px;
+  left: -6px;
+  width: 12px;
+  height: 12px;
+  background: #007acc;
+  border: 2px solid white;
+  border-radius: 50%;
+  cursor: pointer;
+  pointer-events: all;
+}
+
+.timeline-tracks {
+  position: absolute;
+  top: 30px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto;
+}
+
+.timeline-track {
+  display: flex;
+  height: 40px;
+  border-bottom: 1px solid #222;
+}
+
+.track-header {
+  width: 120px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
+  background: #1a1a2e;
+  border-right: 1px solid #333;
+  flex-shrink: 0;
+}
+
+.player-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid #333;
+}
+
+.player-name {
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.track-content {
+  flex: 1;
+  position: relative;
+  background: #0f1419;
+}
+
+.action-marker {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  border: 2px solid #333;
+  transition: all 0.2s ease;
+  z-index: 5;
+}
+
+.action-marker:hover {
+  transform: translateY(-50%) scale(1.1);
+  border-color: #fff;
+  z-index: 6;
+}
+
+.action-marker.dragging {
+  cursor: grabbing;
+  transform: translateY(-50%) scale(1.2);
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.action-icon {
+  font-size: 12px;
+  line-height: 1;
+}
+
+.action-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: white;
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 20;
+}
+
+.action-marker:hover .action-tooltip {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.delete-action {
+  background: #ff3838;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  font-size: 10px;
+  cursor: pointer;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-action:hover {
+  background: #ff5555;
+}
+
+.timeline-grid {
+  position: absolute;
+  top: 30px;
+  left: 120px;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.grid-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: #222;
+}
+
+.timeline-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #666;
+  padding-top: 8px;
+  border-top: 1px solid #333;
+}
+
+.duration-info {
+  font-family: 'Courier New', monospace;
+}
+
+.actions-count {
+  color: #aaa;
+}
+
+/* 스크롤바 스타일링 */
+.timeline-tracks::-webkit-scrollbar {
+  width: 6px;
+}
+
+.timeline-tracks::-webkit-scrollbar-track {
+  background: #0f1419;
+}
+
+.timeline-tracks::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+}
+
+.timeline-tracks::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .timeline-editor {
+    padding: 12px;
+  }
+  
+  .track-header {
+    width: 80px;
+  }
+  
+  .player-name {
+    font-size: 10px;
+  }
+  
+  .action-marker {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .action-icon {
+    font-size: 10px;
+  }
+}
