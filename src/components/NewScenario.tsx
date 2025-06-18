@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useScenario } from '../contexts/ScenarioContext';
@@ -379,15 +379,68 @@ function TemplateSection() {
 }
 
 // Generate Button Component
-function GenerateButton({ onGenerate }: { onGenerate: () => void }) {
+function GenerateButton({ 
+  onGenerate, 
+  isLoading, 
+  error,
+  onClearError
+}: { 
+  onGenerate: () => void;
+  isLoading: boolean;
+  error: string;
+  onClearError: () => void;
+}) {
   return (
     <section className="section-container compact-spacing">
-      <div className="content-width">
+      <div className="content-width">        {error && (
+          <div style={{
+            backgroundColor: '#ff4444',
+            color: 'white',
+            padding: '12px',
+            borderRadius: '8px',
+            marginBottom: '16px',
+            textAlign: 'center',
+            fontWeight: 'bold',
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <span>{error}</span>            <button
+              onClick={onClearError}
+              style={{
+                position: 'absolute',
+                right: '12px',
+                background: 'none',
+                border: 'none',
+                color: 'white',
+                fontSize: '18px',
+                cursor: 'pointer',
+                padding: '0',
+                width: '20px',
+                height: '20px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              title="닫기"
+            >
+              ×
+            </button>
+          </div>
+        )}
         <div className="generate-button-container">
-          <div className="generate-button" onClick={onGenerate}>
+          <div 
+            className={`generate-button ${isLoading ? 'loading' : ''}`} 
+            onClick={isLoading ? undefined : onGenerate}
+            style={{ 
+              opacity: isLoading ? 0.6 : 1,
+              cursor: isLoading ? 'not-allowed' : 'pointer'
+            }}
+          >
             <div className="generate-button-background" />
             <div className="generate-button-text">
-              GENERATE SCENARIO
+              {isLoading ? 'GENERATING...' : 'GENERATE SCENARIO'}
             </div>
           </div>
         </div>
@@ -401,6 +454,8 @@ export default function NewScenario() {
   const [selectedMap, setSelectedMap] = useState<string>('');
   const [ourAgents, setOurAgents] = useState<string[]>([]);
   const [enemyAgents, setEnemyAgents] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
 
   const handleMapSelect = (mapName: string) => {
     setSelectedMap(mapName);
@@ -426,12 +481,14 @@ export default function NewScenario() {
         return prev;
       });
     }
-  };
-  const handleGenerateScenario = async () => {
+  };  const handleGenerateScenario = async () => {
     if (!selectedMap || ourAgents.length !== 5 || enemyAgents.length !== 5) {
-      alert('맵 1개와 각 팀의 요원 5명을 모두 선택해주세요.');
+      setError('맵 1개와 각 팀의 요원 5명을 모두 선택해주세요.');
       return;
     }
+
+    setIsLoading(true);
+    setError('');
 
     try {
       // 백엔드에 시나리오 생성 요청
@@ -451,14 +508,18 @@ export default function NewScenario() {
           agentRole: getAgentRole(agent),
           position: index
         }))
-      });      const scenario = response as any;
+      });
+
+      const scenario = response as any;
       
       // 시나리오 에디터로 이동 (URL 파라미터로 ID 전달)
       navigate(`/editor/${scenario.id}`);
       
     } catch (error: any) {
       console.error('시나리오 생성 실패:', error);
-      alert(error.message || '시나리오 생성에 실패했습니다.');
+      setError(error.message || '시나리오 생성에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -486,6 +547,17 @@ export default function NewScenario() {
     return roles[agentName] || 'Duelist';
   };
 
+  // 오류 메시지를 5초 후에 자동으로 사라지게 함
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError('');
+      }, 5000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
   return (
     <div className="new-scenario">
       {/* Background */}
@@ -509,8 +581,12 @@ export default function NewScenario() {
           onAgentSelect={handleAgentSelect}
           selectedAgents={enemyAgents}
         />
-        <TemplateSection />
-        <GenerateButton onGenerate={handleGenerateScenario} />
+        <TemplateSection />        <GenerateButton 
+          onGenerate={handleGenerateScenario} 
+          isLoading={isLoading}
+          error={error}
+          onClearError={() => setError('')}
+        />
       </div>
     </div>
   );

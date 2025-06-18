@@ -134,6 +134,7 @@ router.post('/', async (req: any, res) => {
         title: data.title,
         description: data.description,
         mapId: data.mapId,
+        mapName: data.mapName,
         isPublic: data.isPublic,
         authorId: testUser.id,
         teams: {
