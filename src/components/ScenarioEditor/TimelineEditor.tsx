@@ -190,17 +190,18 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
               </div>
                 <div className="track-content">                {actionsByPlayer[team.id]?.map(event => {
                   const position = (event.timestamp / duration) * 100;
-                  // 스킬 블록 처리
+                  // 스킬/이동 블록 처리
                   const isSkill = event.eventType === 'skill';
+                  const isMove = event.eventType === 'move';
                   let blockWidth = undefined;
                   let durationMs = 0;
-                  if (isSkill) {
-                    let eventData = {};
-                    if (typeof event.data === 'string') {
-                      try { eventData = JSON.parse(event.data); } catch {}
-                    } else if (typeof event.data === 'object') {
-                      eventData = event.data;
-                    }
+                  let eventData = {};
+                  if (typeof event.data === 'string') {
+                    try { eventData = JSON.parse(event.data); } catch {}
+                  } else if (typeof event.data === 'object') {
+                    eventData = event.data;
+                  }
+                  if (isSkill || isMove) {
                     durationMs = eventData?.duration || 0;
                     if (durationMs > 0) {
                       blockWidth = (durationMs / duration) * 100;
@@ -209,10 +210,10 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
                   return (
                     <div
                       key={event.id}
-                      className={`action-marker${isSkill && blockWidth ? ' skill-block' : ''} ${dragActionId === event.id ? 'dragging' : ''}`}
+                      className={`action-marker${(isSkill || isMove) && blockWidth ? ' skill-block' : ''} ${dragActionId === event.id ? 'dragging' : ''}`}
                       style={{
                         left: `${position}%`,
-                        width: isSkill && blockWidth ? `${blockWidth}%` : undefined,
+                        width: (isSkill || isMove) && blockWidth ? `${blockWidth}%` : undefined,
                         backgroundColor: getActionColor(event.eventType || 'unknown'),
                       }}
                       onMouseDown={(e) => handleActionDragStart(event.id, e)}
@@ -232,7 +233,7 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
                       <div className="action-tooltip">
                         <div>{event.eventType}</div>
                         <div>{formatTime(event.timestamp)}</div>
-                        {isSkill && durationMs > 0 && (
+                        {(isSkill || isMove) && durationMs > 0 && (
                           <div>지속: {Math.round(durationMs/1000)}초</div>
                         )}
                         {/* 삭제 버튼은 숨김 처리 (우클릭으로만 삭제) */}

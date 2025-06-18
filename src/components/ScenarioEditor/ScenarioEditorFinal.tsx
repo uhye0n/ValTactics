@@ -361,7 +361,7 @@ const ScenarioEditor: React.FC = () => {
       // 기존 위치
       const prevPath = movementPaths[selectedPlayerId] || [];
       const last = prevPath.length > 0 ? prevPath[prevPath.length - 1] : playerPositions[selectedPlayerId] || { x: 50, y: 50 };
-      const speed = actionMode === 'run' ? 80 : 40; // 1초에 8000%/4000% 이동(1000배 빠름)
+      const speed = actionMode === 'run' ? 40 : 20; // 1초에 4000%/2000% 이동(속도 절반)
       const dx = clampedX - last.x;
       const dy = clampedY - last.y;
       const dist = Math.sqrt(dx * dx + dy * dy);
@@ -560,52 +560,7 @@ const ScenarioEditor: React.FC = () => {
                       pointerEvents: 'auto'
                     }}
                   >
-                    {/* 이동 경로 시각화 (SVG) */}
-                    <svg
-                      className="movement-svg"
-                      width="100%"
-                      height="100%"
-                      style={{
-                        position: 'absolute',
-                        left: 0,
-                        top: 0,
-                        width: '100%',
-                        height: '100%',
-                        pointerEvents: 'none',
-                        zIndex: 5
-                      }}
-                    >
-                      {Object.entries(movementPaths).map(([playerId, path]) => {
-                        if (!playerId || !Array.isArray(path) || path.length < 2) return null;
-                        const safePath = path.map(pt => ({
-                          x: Math.max(0, Math.min(100, pt.x)),
-                          y: Math.max(0, Math.min(100, pt.y)),
-                          time: pt.time
-                        }));
-                        const player = players.find(p => p.id === playerId);
-                        if (!player) return null;
-                        // map-overlay의 실제 px 크기를 기준으로 변환
-                        const mapOverlay = mapContainerRef.current?.querySelector('.map-overlay') as HTMLElement;
-                        const overlayRect = mapOverlay?.getBoundingClientRect();
-                        const overlayW = overlayRect?.width || 1;
-                        const overlayH = overlayRect?.height || 1;
-                        const points = safePath.map(pt => {
-                          const { x, y } = percentToPx(pt.x, pt.y, overlayW, overlayH);
-                          return `${x},${y}`;
-                        }).join(' ');
-                        return (
-                          <polyline
-            key={`polyline-${playerId}`}
-            points={points}
-            fill="none"
-            stroke={player.team === 'our' ? '#00BFFF' : '#F44336'}
-            strokeWidth={3}
-            opacity={0.8}
-            style={{ pointerEvents: 'none' }}
-          />
-                        );
-                      })}
-                    </svg>
+                    {/* 이동 경로 시각화 (SVG) 제거됨 */}
 
                     {/* 스킬 효과 시각화 */}
                     {skillEffects.map((skill) => {
