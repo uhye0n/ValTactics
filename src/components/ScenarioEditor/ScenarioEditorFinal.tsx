@@ -268,21 +268,19 @@ const ScenarioEditor: React.FC = () => {
     if (!mapContainer) return;
     
     const mapOverlay = mapContainer.querySelector('.map-overlay') as HTMLElement;
-    if (!mapOverlay) return;
-    
-    const handleMouseMove = (moveEvent: MouseEvent) => {
+    if (!mapOverlay) return;    const handleMouseMove = (moveEvent: MouseEvent) => {
       const overlayRect = mapOverlay.getBoundingClientRect();
       
-      // 마우스 위치를 맵 오버레이 기준 백분율로 직접 변환
+      // 마우스 위치를 맵 오버레이 기준 백분율로 변환
       const mouseX = moveEvent.clientX - overlayRect.left;
       const mouseY = moveEvent.clientY - overlayRect.top;
       
       const percentX = (mouseX / overlayRect.width) * 100;
       const percentY = (mouseY / overlayRect.height) * 100;
       
-      // 경계 체크
-      const clampedX = Math.max(2, Math.min(98, percentX));
-      const clampedY = Math.max(2, Math.min(98, percentY));
+      // 이미지 전체 영역을 사용할 수 있도록 범위 설정
+      const clampedX = Math.max(0, Math.min(100, percentX));
+      const clampedY = Math.max(0, Math.min(100, percentY));
       
       setPlayerPositions(prev => ({
         ...prev,
@@ -317,9 +315,8 @@ const ScenarioEditor: React.FC = () => {
     const teamIndex = isOurTeam 
       ? players.filter(p => p.team === 'our').indexOf(player)
       : players.filter(p => p.team === 'enemy').indexOf(player);
-    
-    const baseX = isOurTeam ? 15 : 75;
-    const baseY = 20 + (teamIndex * 12);
+      const baseX = isOurTeam ? 15 : 75;
+    const baseY = 10 + (teamIndex * 10);
     
     return { x: baseX, y: baseY };
   };
