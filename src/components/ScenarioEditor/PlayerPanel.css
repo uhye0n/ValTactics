@@ -1,5 +1,5 @@
 .player-panel {
-  background: #2e1a1a; /* 남색 #1a1a2e에서 붉은 톤 #2e1a1a로 변경 */
+  background: #1a1a2e;
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 16px;
@@ -43,7 +43,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 8px 12px;
-  background: #19140f; /* 남색 톤 #0f1419에서 붉은 톤 #19140f로 변경 */
+  background: #0f1419;
   border-radius: 6px;
   border-left: 3px solid transparent;
   cursor: pointer;
@@ -51,13 +51,13 @@
 }
 
 .player-item:hover {
-  background: #3e2116; /* 남색 톤 #16213e에서 붉은 톤 #3e2116으로 변경 */
+  background: #16213e;
   transform: translateX(2px);
 }
 
 .player-item.selected {
-  background: #3e2116; /* 남색 톤 #16213e에서 붉은 톤 #3e2116으로 변경 */
-  box-shadow: 0 0 0 2px #cc7a00; /* 파란색 #007acc에서 붉은 톤 #cc7a00으로 변경 */
+  background: #16213e;
+  box-shadow: 0 0 0 2px #007acc;
 }
 
 .player-info {
