@@ -70,6 +70,58 @@ router.get('/', async (req: any, res) => {
   }
 })
 
+// 사용자별 시나리오 목록 조회 (자신의 시나리오만) - /:id 라우트보다 먼저 정의
+router.get('/my-scenarios', async (req: any, res) => {
+  try {
+    const { page = 1, limit = 10, search = '' } = req.query;
+    
+    console.log('내 시나리오 요청:', { page, limit, search });
+    
+    // 임시로 테스트 사용자 시나리오 가져오기
+    const testUser = await prisma.user.findFirst({
+      where: { email: 'test@valtactics.com' }
+    });
+    
+    if (!testUser) {
+      console.log('테스트 사용자를 찾을 수 없음');
+      return res.status(404).json({ error: '사용자를 찾을 수 없습니다.' });
+    }
+    
+    console.log('테스트 사용자 찾음:', testUser.id);
+    
+    let where: any = { authorId: testUser.id };
+    
+    // 검색어가 있으면 제목에서 검색
+    if (search) {
+      where.title = { contains: search };
+    }
+
+    const scenarios = await prisma.scenario.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      skip: (Number(page) - 1) * Number(limit),
+      take: Number(limit)
+    });
+    
+    const total = await prisma.scenario.count({ where });
+    
+    console.log(`찾은 시나리오 개수: ${scenarios.length}, 전체: ${total}`);
+    
+    res.json({
+      scenarios,
+      pagination: {
+        page: Number(page),
+        limit: Number(limit),
+        total,
+        pages: Math.ceil(total / Number(limit))
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching user scenarios:', error);
+    res.status(500).json({ error: '내 시나리오 목록을 가져오는데 실패했습니다.' });
+  }
+})
+
 // 특정 시나리오 조회 (공개 시나리오는 인증 없이도 조회 가능)
 router.get('/:id', async (req: any, res) => {
   try {

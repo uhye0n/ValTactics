@@ -6,6 +6,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ScenarioProvider } from "./contexts/ScenarioContext";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import NewScenario from "./components/NewScenario";
+import MyScenarios from "./components/MyScenarios";
 import ScenarioEditor from "./components/ScenarioEditor/ScenarioEditorFinal";
 import "./App.css";
 
@@ -79,6 +80,22 @@ export default function App() {
                 >
                   <Header />
                   <ScenarioEditor />
+                </div>
+              </div>
+            } />
+            <Route path="/my-scenarios" element={
+              <div className="app">
+                <div
+                  className="app__background"
+                  style={{
+                    backgroundImage: `url(${backgroundImage})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    backgroundRepeat: "no-repeat",
+                  }}
+                >
+                  <Header />
+                  <MyScenarios />
                 </div>
               </div>
             } />

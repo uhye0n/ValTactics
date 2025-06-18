@@ -5,10 +5,11 @@ import { useNavigate } from 'react-router-dom';
 export function MainNavigation() {
   const panelItems = getPanelItems();
   const navigate = useNavigate();
-
   const handlePanelClick = (panelId: string) => {
     if (panelId === 'new-scenario') {
       navigate('/new-scenario');
+    } else if (panelId === 'my-scenarios') {
+      navigate('/my-scenarios');
     }
     // Navigation logic for other panels can be implemented here
   };

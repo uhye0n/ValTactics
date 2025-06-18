@@ -97,6 +97,18 @@ class ApiService {
     return this.request(`/scenarios${queryString}`)
   }
 
+  async getMyScenarios(params?: {
+    page?: number
+    limit?: number
+    search?: string
+  }) {
+    const queryString = params 
+      ? '?' + new URLSearchParams(params as any).toString()
+      : ''
+    
+    return this.request(`/scenarios/my-scenarios${queryString}`)
+  }
+
   async getScenario(id: string) {
     return this.request(`/scenarios/${id}`)
   }
