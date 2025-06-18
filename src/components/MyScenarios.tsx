@@ -104,82 +104,97 @@ const MyScenarios: React.FC = () => {
         </div>
       </div>
     );
-  }
-  return (    <div className="my-scenarios-container">
-
+  }  return (
+    <div className="my-scenarios-container">
       {error && (
         <div className="error-message">
-          <span>{error}</span>
-          <button onClick={() => setError('')} className="close-button">×</button>
+          <div className="error-content">
+            <span className="error-text">{error}</span>
+            <button onClick={() => setError('')} className="error-close">×</button>
+          </div>
         </div>
       )}
 
-      {isLoading ? (
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
-          <p>시나리오를 불러오는 중...</p>
-        </div>
-      ) : scenarios.length === 0 ? (
-        <div className="empty-state">
-          <h3>아직 생성한 시나리오가 없습니다</h3>
-          <p>새로운 시나리오를 만들어보세요!</p>
-          <button 
-            onClick={() => navigate('/new-scenario')} 
-            className="create-scenario-button"
-          >
-            시나리오 만들기
-          </button>
-        </div>
-      ) : (
-        <div className="scenarios-grid">
-          {scenarios.map((scenario) => (
-            <div 
-              key={scenario.id} 
-              className="scenario-card"
-              onClick={() => handleScenarioClick(scenario.id)}
-            >              <div className="scenario-header">
-                <h3 className="scenario-title">{scenario.title}</h3>
-                <div className="scenario-actions">
-                  <div className="scenario-status">
-                    {scenario.isPublic ? (
-                      <span className="status-badge public">공개</span>
-                    ) : (
-                      <span className="status-badge private">비공개</span>
+      <div className="content-area">
+        {isLoading ? (
+          <div className="loading-state">
+            <div className="loading-spinner"></div>
+            <p className="loading-text">시나리오를 불러오는 중...</p>
+          </div>
+        ) : scenarios.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-icon">📋</div>
+            <h3 className="empty-title">아직 생성한 시나리오가 없습니다</h3>
+            <p className="empty-description">첫 번째 시나리오를 만들어 전술을 계획해보세요!</p>
+            <button 
+              onClick={() => navigate('/new-scenario')} 
+              className="empty-create-btn"
+            >
+              시나리오 만들기
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="scenarios-info">
+              <span className="scenarios-count">총 {scenarios.length}개의 시나리오</span>
+            </div>
+            <div className="scenarios-grid">
+              {scenarios.map((scenario) => (
+                <div 
+                  key={scenario.id} 
+                  className="scenario-card"
+                  onClick={() => handleScenarioClick(scenario.id)}
+                >
+                  <div className="card-header">
+                    <div className="card-title-area">
+                      <h3 className="card-title">{scenario.title}</h3>
+                      <div className="card-status">
+                        <span className={`status-badge ${scenario.isPublic ? 'public' : 'private'}`}>
+                          {scenario.isPublic ? '공개' : '비공개'}
+                        </span>
+                      </div>
+                    </div>
+                    <button 
+                      className="delete-btn"
+                      onClick={(e) => handleDeleteScenario(scenario.id, e)}
+                      aria-label="시나리오 삭제"
+                      title="시나리오 삭제"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                      </svg>
+                    </button>
+                  </div>
+                  
+                  <div className="card-content">
+                    <div className="map-info">
+                      <span className="map-icon">🗺️</span>
+                      <span className="map-name">{getMapDisplayName(scenario.mapId)}</span>
+                    </div>
+                    
+                    {scenario.description && (
+                      <p className="card-description">{scenario.description}</p>
                     )}
                   </div>
-                  <button 
-                    className="delete-button"
-                    onClick={(e) => handleDeleteScenario(scenario.id, e)}
-                    aria-label="시나리오 삭제"
-                  >
-                    ×
-                  </button>
+                  
+                  <div className="card-footer">
+                    <div className="date-info">
+                      <span className="date-label">생성:</span>
+                      <span className="date-value">{formatDate(scenario.createdAt)}</span>
+                    </div>
+                    {scenario.updatedAt !== scenario.createdAt && (
+                      <div className="date-info">
+                        <span className="date-label">수정:</span>
+                        <span className="date-value">{formatDate(scenario.updatedAt)}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-              
-              <div className="scenario-info">
-                <div className="map-info">
-                  <span className="map-label">맵:</span>
-                  <span className="map-name">{getMapDisplayName(scenario.mapId)}</span>
-                </div>
-                
-                {scenario.description && (
-                  <p className="scenario-description">{scenario.description}</p>
-                )}
-              </div>
-              
-              <div className="scenario-footer">
-                <div className="dates">
-                  <span className="created-date">생성: {formatDate(scenario.createdAt)}</span>
-                  {scenario.updatedAt !== scenario.createdAt && (
-                    <span className="updated-date">수정: {formatDate(scenario.updatedAt)}</span>
-                  )}
-                </div>
-              </div>
+              ))}
             </div>
-          ))}
-        </div>
-      )}
+          </>
+        )}
+      </div>
     </div>
   );
 };
