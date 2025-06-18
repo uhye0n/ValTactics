@@ -27,6 +27,14 @@ const ActionSelectionPanel: React.FC<ActionSelectionPanelProps> = ({
     );
   }
 
+  // 요원 이름을 이미지 파일명으로 변환하는 함수
+  const getAgentImageName = (agentName: string): string => {
+    if (agentName === 'KAY/O') {
+      return 'Kayo';
+    }
+    return agentName;
+  };
+
   const quickActions = [
     { id: 'move', name: '걷기', icon: '🚶', color: '#00BFFF' },
     { id: 'run', name: '달리기', icon: '🏃', color: '#FFA500' },
@@ -67,7 +75,7 @@ const ActionSelectionPanel: React.FC<ActionSelectionPanelProps> = ({
       <div className="selected-player-info">
         <div className="player-avatar">
           <img 
-            src={`/resources/images/agent/${selectedPlayer.agent}.png`}
+            src={`/resources/images/agent/${getAgentImageName(selectedPlayer.agent)}.png`}
             alt={selectedPlayer.agent}
             onError={(e) => {
               e.currentTarget.src = '/resources/images/agent/default.png';

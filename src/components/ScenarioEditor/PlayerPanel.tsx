@@ -26,7 +26,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
           >
             <div className="player-avatar">
               <img 
-                src={`/resources/images/agent/${player.agent}.png`}
+                src={`/resources/images/agent/${getAgentImageName(player.agent)}.png`}
                 alt={player.agent}
                 style={{
                   width: '32px',
@@ -58,7 +58,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
             </div>
             <div className="player-info">
               <div className="player-agent">{player.agent}</div>
-              <div className="player-name">{player.name}</div>
+              <div className="player-name">{player.role}</div>
             </div>
           </div>
         ))}
@@ -84,6 +84,14 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
       )}
     </div>
   );
+};
+
+// 요원 이름을 이미지 파일명으로 변환하는 함수
+const getAgentImageName = (agentName: string): string => {
+  if (agentName === 'KAY/O') {
+    return 'Kayo';
+  }
+  return agentName;
 };
 
 export default PlayerPanel;
