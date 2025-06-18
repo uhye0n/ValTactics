@@ -39,7 +39,7 @@ const ActionSelectionPanel: React.FC<ActionSelectionPanelProps> = ({
       actions: [
         { id: 'ability_1', name: 'Q 스킬', icon: 'Q', color: '#feca57' },
         { id: 'ability_2', name: 'E 스킬', icon: 'E', color: '#ff9ff3' },
-        { id: 'ability_3', name: 'C 스킬', icon: 'C', color: '#54a0ff' },
+        { id: 'ability_3', name: 'C 스킬', icon: 'C', color: '#ff6b6b' }, // 파란색에서 붉은색으로 변경
         { id: 'ultimate', name: '궁극기 (X)', icon: 'X', color: '#ee5a24' }
       ]
     },
@@ -58,7 +58,7 @@ const ActionSelectionPanel: React.FC<ActionSelectionPanelProps> = ({
       icon: '🛠️',
       actions: [
         { id: 'plant', name: '스파이크 설치', icon: '💣', color: '#f44336' },
-        { id: 'defuse', name: '스파이크 해체', icon: '🔧', color: '#2196f3' },
+        { id: 'defuse', name: '스파이크 해체', icon: '🔧', color: '#ff4757' }, // 파란색에서 붉은색으로 변경
         { id: 'peek', name: '피킹', icon: '👁️', color: '#ff9800' },
         { id: 'hide', name: '숨기', icon: '🫥', color: '#607d8b' }
       ]
