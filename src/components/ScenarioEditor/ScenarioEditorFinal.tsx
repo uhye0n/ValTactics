@@ -42,6 +42,8 @@ const ScenarioEditor: React.FC = () => {
   // 맵 팬 기능을 위한 상태
   const [mapOffset, setMapOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState<{x: number, y: number} | null>(null);
+  const [dragOrigin, setDragOrigin] = useState<{x: number, y: number} | null>(null);
   const [mapScale, setMapScale] = useState(1.2);
   const mapContainerRef = useRef<HTMLDivElement>(null);
 
@@ -265,51 +267,35 @@ const ScenarioEditor: React.FC = () => {
     } catch (error) {
       console.error('Failed to record player action:', error);
     }
-  };// 맵 드래그 이벤트 핸들러들
+  };// 맵 드래그 상태 관리
   const handleMouseDown = (e: React.MouseEvent) => {
-    // 플레이어를 드래그하는 중이면 맵 드래그 방지
-    if (draggedPlayer) return;
-    
-    if (e.button === 1) { // 마우스 가운데 버튼 (휠 클릭)
+    // 가운데 버튼: e.button === 1 또는 e.buttons & 4
+    if (e.button === 1 || (e.buttons & 4)) {
       e.preventDefault();
       setIsDragging(true);
-      
-      // 현재 마우스 위치와 맵 오프셋의 차이를 계산
-      const startX = e.clientX - mapOffset.x;
-      const startY = e.clientY - mapOffset.y;
-        const handleMouseMove = (moveEvent: MouseEvent) => {
-        if (mapContainerRef.current) {
-          const containerRect = mapContainerRef.current.getBoundingClientRect();
-          
-          // 맵 이미지의 실제 크기 계산 (200% * 스케일)
-          const imageScale = 2.0 * mapScale; // 200% CSS + 동적 스케일
-          const scaledImageWidth = containerRect.width * imageScale;
-          const scaledImageHeight = containerRect.height * imageScale;
-          
-          // 컨테이너를 벗어나지 않도록 최대 오프셋 계산
-          const maxOffsetX = Math.max(0, (scaledImageWidth - containerRect.width) / 2);
-          const maxOffsetY = Math.max(0, (scaledImageHeight - containerRect.height) / 2);
-          
-          let newX = moveEvent.clientX - startX;
-          let newY = moveEvent.clientY - startY;
-          
-          // 드래그 범위 제한 - 이미지 크기에 비례하여 자연스럽게 제한
-          newX = Math.max(-maxOffsetX, Math.min(maxOffsetX, newX));
-          newY = Math.max(-maxOffsetY, Math.min(maxOffsetY, newY));
-          
-          setMapOffset({ x: newX, y: newY });
-        }
-      };
-        const handleMouseUp = () => {
-        setIsDragging(false);
-        document.body.classList.remove('map-active'); // body 드래그 방지 해제
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
-      };
-      
-      document.body.classList.add('map-active'); // body 드래그 방지 활성화
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
+      setDragStart({ x: e.clientX, y: e.clientY });
+      setDragOrigin({ ...mapOffset });
+      window.addEventListener('mousemove', handleMouseMove as any);
+      window.addEventListener('mouseup', handleMouseUp as any);
+    }
+  };
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isDragging || !dragStart || !dragOrigin) return;
+    const dx = e.clientX - dragStart.x;
+    const dy = e.clientY - dragStart.y;
+    setMapOffset(prev => {
+      const next = { x: dragOrigin.x + dx, y: dragOrigin.y + dy };
+      console.log('mapOffset', next);
+      return next;
+    });
+  };
+  const handleMouseUp = (e: MouseEvent) => {
+    if (e.button === 1) {
+      setIsDragging(false);
+      setDragStart(null);
+      setDragOrigin(null);
+      window.removeEventListener('mousemove', handleMouseMove as any);
+      window.removeEventListener('mouseup', handleMouseUp as any);
     }
   };
   const handleWheel = (e: React.WheelEvent) => {
@@ -537,7 +523,7 @@ const ScenarioEditor: React.FC = () => {
                     top: '50%',
                     width: '200%',
                     height: '200%',
-                    transform: `translate(-50%, -50%) scale(${mapScale})`,
+                    transform: `translate(-50%, -50%) scale(${mapScale}) translate(${mapOffset.x}px, ${mapOffset.y}px)`,
                     transformOrigin: 'center center',
                     transition: isDragging ? 'none' : 'transform 0.1s ease-out'
                   }}
