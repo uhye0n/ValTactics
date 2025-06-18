@@ -235,9 +235,7 @@ const ScenarioEditor: React.FC = () => {
 
   const handlePlayerSelect = (playerId: string | null) => {
     setSelectedPlayerId(playerId);
-    if (playerId) {
-      setRightPanelMode('actions'); // 플레이어 선택 후 액션 패널로 전환
-    }
+    // 패널 자동 전환 제거
   };  const handleActionSelect = (actionType: string) => {
     setSelectedAction(actionType);
   };
@@ -397,7 +395,7 @@ const ScenarioEditor: React.FC = () => {
   const convertTeamsToPlayers = (teams: any[] = []): Player[] => {
     return teams.map((team) => ({
       id: team.id,
-      name: `${team.agentName} ${team.position + 1}`, // "Jett 1", "Sage 2" 형태
+      name: team.agentName, // 숫자 제거
       agent: team.agentName,
       team: team.teamType as 'our' | 'enemy',
       role: team.agentRole,

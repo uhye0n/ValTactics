@@ -18,10 +18,11 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
     <div className="team-section">
       <h3 className={`team-title ${teamType}`}>{teamName}</h3>
       <div className="players-list">
-        {teamPlayers.map(player => (          <div
+        {teamPlayers.map(player => (
+          <div
             key={player.id}
             className={`player-item ${selectedPlayerId === player.id ? 'selected' : ''}`}
-            onClick={() => onPlayerSelect(player.id)}
+            onClick={() => onPlayerSelect(selectedPlayerId === player.id ? null : player.id)}
             style={{ borderLeftColor: player.team === 'our' ? '#00BFFF' : '#F44336' }}
           >
             <div className="player-avatar">
@@ -69,19 +70,6 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
   return (
     <div className="player-panel">      <h2>플레이어</h2>      {renderPlayerList(ourTeam, '아군팀', 'our')}
       {renderPlayerList(enemyTeam, '적군팀', 'enemy')}
-      
-      {selectedPlayerId && (
-        <div className="selected-player-info">
-          <h4>선택된 플레이어</h4>
-          <p>{players.find(p => p.id === selectedPlayerId)?.name}</p>
-          <button 
-            className="deselect-button"
-            onClick={() => onPlayerSelect(null)}
-          >
-            선택 해제
-          </button>
-        </div>
-      )}
     </div>
   );
 };
