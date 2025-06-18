@@ -252,8 +252,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
           <p className="auth-modal__demo-text">
             데모 계정으로 로그인하기:
           </p>
-          <p className="auth-modal__demo-info">
-            이메일: player@valtactics.com<br />
+          <p className="auth-modal__demo-info">            이메일: test@valtactics.com<br />
             비밀번호: password123
           </p>
         </div>

@@ -50,7 +50,23 @@ export default function App() {
                   <NewScenario />
                 </div>
               </div>
-            } />            <Route path="/scenario-editor" element={
+            } />            <Route path="/editor/:scenarioId" element={
+              <div className="app">
+                <div
+                  className="app__background"
+                  style={{
+                    backgroundImage: `url(${backgroundImage})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    backgroundRepeat: "no-repeat",
+                  }}
+                >
+                  <Header />
+                  <ScenarioEditor />
+                </div>
+              </div>
+            } />
+            <Route path="/scenario-editor" element={
               <div className="app">
                 <div
                   className="app__background"

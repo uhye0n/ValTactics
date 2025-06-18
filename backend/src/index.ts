@@ -7,7 +7,7 @@ import { Server } from 'socket.io'
 
 // Routes
 import authRoutes from './routes/auth'
-import scenarioRoutes from './routes/scenarios'
+import scenarioRoutes from './routes/scenarios_simple'
 import mapRoutes from './routes/maps'
 import userRoutes from './routes/users'
 

@@ -4,8 +4,11 @@ import type {
   ScenarioContextType, 
   ScenarioPlayback, 
   Player, 
-  PlayerAction 
+  PlayerAction,
+  CreateScenarioData
 } from '../types/scenario';
+import apiService from '../services/api';
+import socketService from '../services/socket';
 
 const ScenarioContext = createContext<ScenarioContextType | undefined>(undefined);
 
@@ -27,13 +30,58 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children }) 
   const [playback, setPlayback] = useState<ScenarioPlayback | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Socket 연결 및 실시간 이벤트 처리
+  useEffect(() => {
+    socketService.connect();
+
+    // 시나리오 업데이트 수신
+    const handleScenarioUpdated = (data: any) => {
+      if (currentScenario && data.scenarioId === currentScenario.id) {
+        setCurrentScenario(prev => prev ? { ...prev, ...data } : null);
+      }
+    };
+
+    // 타임라인 동기화 수신
+    const handleTimelineSynced = (data: any) => {
+      if (currentScenario && data.scenarioId === currentScenario.id) {
+        setPlayback(prev => prev ? { ...prev, currentTime: data.currentTime } : null);
+      }
+    };
+
+    socketService.onScenarioUpdated(handleScenarioUpdated);
+    socketService.onTimelineSynced(handleTimelineSynced);
+
+    return () => {
+      socketService.offScenarioUpdated(handleScenarioUpdated);
+      socketService.offTimelineSynced(handleTimelineSynced);
+      socketService.disconnect();
+    };
+  }, [currentScenario]);
+
+  // 컴포넌트 마운트 시 시나리오 목록 로드
+  useEffect(() => {
+    const loadScenarios = async () => {
+      setIsLoading(true);
+      try {
+        const response = await apiService.getScenarios() as { scenarios: Scenario[] };
+        setScenarios(response.scenarios || []);
+      } catch (error) {
+        console.error('Failed to load scenarios:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadScenarios();
+  }, []);
+
   // 타임라인 업데이트 타이머
   useEffect(() => {
     if (!playback?.isPlaying) return;
 
     const interval = setInterval(() => {
       setPlayback(prev => {
-        if (!prev || !prev.isPlaying) return prev;
+        if (!prev || !prev.isPlaying || !prev.scenario.timeline) return prev;
         
         const newTime = prev.currentTime + (16 * prev.playbackSpeed); // 16ms = ~60fps
         const maxTime = prev.scenario.timeline.duration;
@@ -52,75 +100,86 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children }) 
 
     return () => clearInterval(interval);
   }, [playback?.isPlaying, playback?.playbackSpeed, playback?.loop]);
-
-  const createScenario = useCallback(async (data: Partial<Scenario>): Promise<Scenario> => {
+  const createScenario = useCallback(async (data: CreateScenarioData): Promise<Scenario> => {
     setIsLoading(true);
     try {
-      const newScenario: Scenario = {
-        id: `scenario-${Date.now()}`,
-        title: data.title || '새 시나리오',
-        description: data.description || '',
-        mapId: data.mapId || 'ascent',
-        createdBy: 'current-user', // TODO: 실제 사용자 ID
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        isPublic: data.isPublic || false,
-        tags: data.tags || [],
-        players: data.players || [],
-        actions: data.actions || [],
-        timeline: {
-          duration: data.timeline?.duration || 120000, // 2분 기본값
-          currentTime: 0,
-          isPlaying: false,
-          playbackSpeed: 1.0
-        },
-        metadata: {
-          roundType: 'full-buy',
-          gameMode: 'competitive',
-          ...data.metadata
-        }
-      };
-
+      // 백엔드 API 호출
+      const response = await apiService.createScenario(data);
+      const newScenario = response as Scenario;
+      
       setScenarios(prev => [...prev, newScenario]);
       return newScenario;
+    } catch (error: any) {
+      throw new Error(error.message || '시나리오 생성에 실패했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);  const loadScenario = useCallback(async (id: string): Promise<void> => {
+    setIsLoading(true);
+    try {
+      // 백엔드에서 시나리오 데이터 가져오기
+      const scenario = await apiService.getScenario(id) as Scenario;
+      setCurrentScenario(scenario);
+      setPlayback({
+        scenario,
+        isPlaying: false,
+        currentTime: 0,
+        playbackSpeed: 1.0,
+        loop: false,
+        visibleLayers: {
+          movements: true,
+          skills: true,
+          callouts: true,
+          trajectories: true
+        }
+      });
+
+      // Socket으로 시나리오 방 참가
+      socketService.joinScenario(id);
+    } catch (error: any) {
+      console.error('Failed to load scenario:', error);
+      throw new Error(error.message || '시나리오 로드에 실패했습니다.');
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  const loadScenario = useCallback(async (id: string): Promise<void> => {
-    setIsLoading(true);
-    try {
-      const scenario = scenarios.find(s => s.id === id);
-      if (scenario) {
-        setCurrentScenario(scenario);
-        setPlayback({
-          scenario,
-          isPlaying: false,
-          currentTime: 0,
-          playbackSpeed: 1.0,
-          loop: false,
-          visibleLayers: {
-            movements: true,
-            skills: true,
-            callouts: true,
-            trajectories: true
-          }
-        });
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }, [scenarios]);
-
   const saveScenario = useCallback(async (scenario: Scenario): Promise<void> => {
     setIsLoading(true);
     try {
+      // 백엔드에 시나리오 업데이트 요청
+      const updates = {
+        title: scenario.title,
+        description: scenario.description,
+        isPublic: scenario.isPublic
+      };
+      
+      await apiService.updateScenario(scenario.id, updates);
+      
+      // 타임라인 업데이트
+      if (scenario.timeline) {
+        await apiService.updateTimeline(scenario.id, {
+          duration: scenario.timeline.duration,
+          rounds: scenario.timeline.rounds,
+          events: scenario.timeline.events || []
+        });
+      }
+        // 맵 오브젝트 업데이트
+      if (scenario.mapObjects) {
+        await apiService.updateMapObjects(scenario.id, scenario.mapObjects);
+      }
+      
       const updatedScenario = { ...scenario, updatedAt: new Date() };
       setScenarios(prev => prev.map(s => s.id === scenario.id ? updatedScenario : s));
       if (currentScenario?.id === scenario.id) {
         setCurrentScenario(updatedScenario);
       }
+
+      // Socket으로 실시간 업데이트 전송
+      socketService.updateScenario(scenario.id, updatedScenario);
+    } catch (error: any) {
+      console.error('Failed to save scenario:', error);
+      throw new Error(error.message || '시나리오 저장에 실패했습니다.');
     } finally {
       setIsLoading(false);
     }
@@ -129,16 +188,21 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children }) 
   const deleteScenario = useCallback(async (id: string): Promise<void> => {
     setIsLoading(true);
     try {
+      // 백엔드에서 시나리오 삭제
+      await apiService.deleteScenario(id);
+      
       setScenarios(prev => prev.filter(s => s.id !== id));
       if (currentScenario?.id === id) {
         setCurrentScenario(null);
         setPlayback(null);
       }
+    } catch (error: any) {
+      console.error('Failed to delete scenario:', error);
+      throw new Error(error.message || '시나리오 삭제에 실패했습니다.');
     } finally {
       setIsLoading(false);
     }
   }, [currentScenario]);
-
   const addPlayer = useCallback((player: Omit<Player, 'id'>) => {
     if (!currentScenario) return;
     
@@ -149,7 +213,7 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children }) 
     
     const updatedScenario = {
       ...currentScenario,
-      players: [...currentScenario.players, newPlayer]
+      players: [...(currentScenario.players || []), newPlayer]
     };
     
     setCurrentScenario(updatedScenario);
@@ -161,8 +225,8 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children }) 
     
     const updatedScenario = {
       ...currentScenario,
-      players: currentScenario.players.filter(p => p.id !== playerId),
-      actions: currentScenario.actions.filter(a => a.playerId !== playerId)
+      players: (currentScenario.players || []).filter(p => p.id !== playerId),
+      actions: (currentScenario.actions || []).filter(a => a.teamCompositionId !== playerId)
     };
     
     setCurrentScenario(updatedScenario);
@@ -174,7 +238,7 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children }) 
     
     const updatedScenario = {
       ...currentScenario,
-      players: currentScenario.players.map(p => 
+      players: (currentScenario.players || []).map(p => 
         p.id === playerId ? { ...p, ...updates } : p
       )
     };
@@ -182,7 +246,6 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children }) 
     setCurrentScenario(updatedScenario);
     setPlayback(prev => prev ? { ...prev, scenario: updatedScenario } : null);
   }, [currentScenario]);
-
   const addAction = useCallback((action: Omit<PlayerAction, 'id'>) => {
     if (!currentScenario) return;
     
@@ -193,7 +256,7 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children }) 
     
     const updatedScenario = {
       ...currentScenario,
-      actions: [...currentScenario.actions, newAction].sort((a, b) => a.timestamp - b.timestamp)
+      actions: [...(currentScenario.actions || []), newAction].sort((a, b) => a.timestamp - b.timestamp)
     };
     
     setCurrentScenario(updatedScenario);
@@ -205,7 +268,7 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children }) 
     
     const updatedScenario = {
       ...currentScenario,
-      actions: currentScenario.actions.filter(a => a.id !== actionId)
+      actions: (currentScenario.actions || []).filter(a => a.id !== actionId)
     };
     
     setCurrentScenario(updatedScenario);
@@ -217,7 +280,7 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children }) 
     
     const updatedScenario = {
       ...currentScenario,
-      actions: currentScenario.actions.map(a => 
+      actions: (currentScenario.actions || []).map(a => 
         a.id === actionId ? { ...a, ...updates } : a
       ).sort((a, b) => a.timestamp - b.timestamp)
     };
@@ -237,10 +300,9 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children }) 
   const stop = useCallback(() => {
     setPlayback(prev => prev ? { ...prev, isPlaying: false, currentTime: 0 } : null);
   }, []);
-
   const seekTo = useCallback((time: number) => {
     setPlayback(prev => {
-      if (!prev) return null;
+      if (!prev || !prev.scenario.timeline) return null;
       const clampedTime = Math.max(0, Math.min(time, prev.scenario.timeline.duration));
       return { ...prev, currentTime: clampedTime };
     });

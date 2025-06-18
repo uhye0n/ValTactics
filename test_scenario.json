@@ -1,0 +1,21 @@
+{
+  "title": "Test Scenario",
+  "description": "Test scenario creation",
+  "mapId": "ascent",
+  "mapName": "Ascent",
+  "isPublic": true,
+  "ourTeam": [
+    {
+      "agentName": "Jett",
+      "agentRole": "Duelist",
+      "position": 1
+    }
+  ],
+  "enemyTeam": [
+    {
+      "agentName": "Sage",
+      "agentRole": "Sentinel",
+      "position": 1
+    }
+  ]
+}

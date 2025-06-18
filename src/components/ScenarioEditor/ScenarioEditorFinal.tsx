@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useScenario } from '../../contexts/ScenarioContext';
 import type { Player, Position } from '../../types/scenario';
 import MapCanvas from './MapCanvas';
@@ -9,12 +10,15 @@ import PlaybackControls from './PlaybackControls';
 import './ScenarioEditorComplete.css';
 
 const ScenarioEditor: React.FC = () => {
-  const { currentScenario } = useScenario();
+  const { scenarioId } = useParams<{ scenarioId: string }>();
+  const navigate = useNavigate();
+  const { currentScenario, loadScenario, isLoading } = useScenario();
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
   const [selectedAction, setSelectedAction] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [rightPanelMode, setRightPanelMode] = useState<'players' | 'actions'>('players');
+  const [loadError, setLoadError] = useState<string | null>(null);
   
   // 맵 팬 기능을 위한 상태
   const [mapOffset, setMapOffset] = useState({ x: 0, y: 0 });
@@ -22,60 +26,60 @@ const ScenarioEditor: React.FC = () => {
   const [mapScale, setMapScale] = useState(1.2); // 초기 스케일을 1에서 1.2로 증가
   const mapContainerRef = useRef<HTMLDivElement>(null);
 
-  // 테스트용 더미 시나리오 데이터
-  const dummyScenario = {
-    id: 'test-scenario',
-    title: 'ASCENT',
-    description: '테스트 시나리오',
-    mapId: 'ascent',
-    createdBy: 'test-user',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    isPublic: false,
-    tags: [],
-    players: [      {
-        id: 'player-1',
-        name: 'Jett',
-        agent: 'Jett',
-        team: 'attack' as const,
-        color: '#ff4757' // 파란색에서 붉은색으로 변경
-      },
-      {
-        id: 'player-2', 
-        name: 'Sage',
-        agent: 'Sage',
-        team: 'attack' as const,
-        color: '#7fff00'
-      },
-      {
-        id: 'player-3',
-        name: 'Omen',
-        agent: 'Omen', 
-        team: 'defense' as const,
-        color: '#9d4edd'
-      },
-      {
-        id: 'player-4',
-        name: 'Cypher',
-        agent: 'Cypher',
-        team: 'defense' as const,
-        color: '#ffd60a'
-      }
-    ],
-    actions: [],
-    timeline: {
-      duration: 120000,
-      currentTime: 0,
-      isPlaying: false,
-      playbackSpeed: 1.0
-    },
-    metadata: {
-      roundType: 'full-buy' as const,
-      gameMode: 'competitive' as const
+  // 시나리오 로드
+  useEffect(() => {
+    if (!scenarioId) {
+      setLoadError('시나리오 ID가 필요합니다.');
+      return;
     }
-  };
-  // currentScenario가 없으면 더미 데이터 사용
-  const scenario = currentScenario || dummyScenario;
+
+    const loadScenarioData = async () => {
+      try {
+        setLoadError(null);
+        await loadScenario(scenarioId);
+      } catch (error: any) {
+        console.error('Failed to load scenario:', error);
+        setLoadError(error.message || '시나리오를 불러오는데 실패했습니다.');
+      }
+    };
+
+    loadScenarioData();
+  }, [scenarioId, loadScenario]);
+  // 로딩 또는 에러 상태 표시
+  if (isLoading) {
+    return (
+      <div className="scenario-editor-loading">
+        <div className="loading-content">
+          <div className="loading-spinner"></div>
+          <p>시나리오를 불러오는 중...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="scenario-editor-error">
+        <div className="error-content">
+          <h2>시나리오 로드 실패</h2>
+          <p>{loadError}</p>
+          <button onClick={() => navigate('/')}>메인으로 돌아가기</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentScenario) {
+    return (
+      <div className="scenario-editor-error">
+        <div className="error-content">
+          <h2>시나리오를 찾을 수 없습니다</h2>
+          <p>요청한 시나리오가 존재하지 않습니다.</p>
+          <button onClick={() => navigate('/')}>메인으로 돌아가기</button>
+        </div>
+      </div>
+    );
+  }
   // 맵 이미지 경로 설정
   const getMapImagePath = (mapId: string) => {
     const mapImageMap: { [key: string]: string } = {
@@ -168,9 +172,8 @@ const ScenarioEditor: React.FC = () => {
         y: Math.min(Math.max(prev.y, -maxOffsetY), maxOffsetY)
       }));
     }
-  };
-  const handleMapClick = (position: Position) => {
-    if (selectedPlayerId && selectedAction && scenario) {
+  };  const handleMapClick = (position: Position) => {
+    if (selectedPlayerId && selectedAction && currentScenario) {
       // 액션 추가 로직은 나중에 구현
       console.log('Action added:', { playerId: selectedPlayerId, action: selectedAction, position });
       
@@ -179,8 +182,9 @@ const ScenarioEditor: React.FC = () => {
       setRightPanelMode('players');
     }
   };
+  
   const selectedPlayer = selectedPlayerId 
-    ? scenario?.players.find(p => p.id === selectedPlayerId) || null
+    ? currentScenario?.players?.find((p: any) => p.id === selectedPlayerId) || null
     : null;
 
   // 로딩 상태는 제거 (더미 데이터가 있으므로 항상 시나리오가 존재)
@@ -211,10 +215,9 @@ const ScenarioEditor: React.FC = () => {
                     transformOrigin: 'center center',
                     transition: isDragging ? 'none' : 'transform 0.1s ease-out'
                   }}
-                >
-                  <img 
-                    src={getMapImagePath(scenario.mapId)} 
-                    alt={`${scenario.title} Map`}
+                >                  <img 
+                    src={getMapImagePath(currentScenario.mapId)} 
+                    alt={`${currentScenario.title} Map`}
                     className="map-image"
                     draggable={false}
                   />
@@ -230,7 +233,7 @@ const ScenarioEditor: React.FC = () => {
                     }}
                   >
                     {/* 플레이어 마커들이 여기에 렌더링됩니다 */}
-                    {scenario.players.map((player, index) => (
+                    {(currentScenario.players || []).map((player: any, index: number) => (
                       <div
                         key={player.id}
                         className={`player-marker ${selectedPlayerId === player.id ? 'selected' : ''}`}
@@ -319,10 +322,9 @@ const ScenarioEditor: React.FC = () => {
               </div>
             </div>
 
-            <div className="panel-content">
-              {rightPanelMode === 'players' ? (
+            <div className="panel-content">              {rightPanelMode === 'players' ? (
                 <PlayerPanel
-                  players={scenario.players}
+                  players={currentScenario.players || []}
                   selectedPlayerId={selectedPlayerId}
                   onPlayerSelect={handlePlayerSelect}
                 />

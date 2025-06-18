@@ -8,7 +8,7 @@ const MOCK_USERS = [
   {
     id: '1',
     username: 'valorant_player',
-    email: 'player@valtactics.com',
+    email: 'test@valtactics.com',
     password: 'password123',
     rank: 'Diamond 2',
     level: 127,

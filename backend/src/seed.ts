@@ -1,4 +1,5 @@
 import { prisma } from './lib/prisma'
+import bcrypt from 'bcryptjs'
 
 const VALORANT_MAPS = [
   {
@@ -128,24 +129,72 @@ async function seed() {
   try {
     console.log('🌱 Starting database seed...')
     
-    // 맵 데이터 시딩
+    // 테스트 사용자 생성
+    console.log('👤 Creating test user...')
+    const hashedPassword = await bcrypt.hash('password123', 10)
+    const testUser = await prisma.user.upsert({
+      where: { email: 'test@valtactics.com' },
+      create: {
+        email: 'test@valtactics.com',
+        username: 'TestUser',
+        password: hashedPassword,
+        rank: 'Diamond 2',
+        level: 127
+      },
+      update: {
+        rank: 'Diamond 2',
+        level: 127
+      }
+    })
+    console.log('✅ Test user created:', testUser.username)    // 맵 데이터 시딩
     console.log('📍 Seeding maps...')
     for (const mapData of VALORANT_MAPS) {
       await prisma.map.upsert({
         where: { id: mapData.id },
         create: {
-          ...mapData,
+          id: mapData.id,
+          name: mapData.name,
+          displayName: mapData.displayName,
+          imageUrl: mapData.imageUrl,
+          viewImageUrl: mapData.viewImageUrl,
+          width: mapData.width,
+          height: mapData.height,
           sites: JSON.stringify(mapData.sites),
           callouts: JSON.stringify(mapData.callouts)
         },
         update: {
-          ...mapData,
+          name: mapData.name,
+          displayName: mapData.displayName,
+          imageUrl: mapData.imageUrl,
+          viewImageUrl: mapData.viewImageUrl,
+          width: mapData.width,
+          height: mapData.height,
           sites: JSON.stringify(mapData.sites),
           callouts: JSON.stringify(mapData.callouts)
         }
       })
       console.log(`✅ ${mapData.displayName} map seeded`)
     }
+
+    // 테스트 시나리오 생성
+    console.log('🎯 Creating test scenario...')
+    const testScenario = await prisma.scenario.upsert({
+      where: { id: 'test-scenario-1' },
+      create: {
+        id: 'test-scenario-1',
+        title: 'Ascent A Site Execute',
+        description: 'A사이트 공격 전략 시나리오',
+        mapId: 'ascent',
+        mapName: 'Ascent',
+        isPublic: true,
+        authorId: testUser.id
+      },
+      update: {
+        title: 'Ascent A Site Execute',
+        description: 'A사이트 공격 전략 시나리오'
+      }
+    })
+    console.log('✅ Test scenario created:', testScenario.title)
     
     console.log('🎉 Database seeding completed!')
     

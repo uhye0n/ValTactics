@@ -1,77 +1,48 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import type { User, LoginFormData, RegisterFormData, ProfileUpdateData, AuthContextType } from '../types/auth';
+import apiService from '../services/api';
+import socketService from '../services/socket';
 
 const AuthContext = createContext<AuthContextType | null>(null);
-
-// 임시 사용자 데이터
-const MOCK_USERS = [
-  {
-    id: '1',
-    username: 'valorant_player',
-    email: 'player@valtactics.com',
-    password: 'password123',
-    rank: 'Diamond 2',
-    level: 127,
-    createdAt: new Date('2024-01-01'),
-    lastLoginAt: new Date(),
-    preferences: {
-      theme: 'dark' as const,
-      language: 'ko' as const,
-      notifications: {
-        email: true,
-        push: true,
-        scenarios: true,
-      },
-      privacy: {
-        showOnlineStatus: true,
-        allowFriendRequests: true,
-      },
-    }
-  }
-];
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
   const login = useCallback(async (data: LoginFormData) => {
     setIsLoading(true);
-    
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      try {
+      // 백엔드 API 호출
+      const response = await apiService.login({
+        email: data.email,
+        password: data.password
+      }) as { user: User; token: string };
       
-      const foundUser = MOCK_USERS.find(u => u.email === data.email && u.password === data.password);
+      const { user, token } = response;
+      setUser(user);
       
-      if (!foundUser) {
-        throw new Error('이메일 또는 비밀번호가 올바르지 않습니다.');
-      }
-
-      const { password, ...userWithoutPassword } = foundUser;
-      const updatedUser = {
-        ...userWithoutPassword,
-        lastLoginAt: new Date()
-      };
+      // Socket 연결 (토큰과 함께)
+      socketService.connect(token);
       
-      setUser(updatedUser);
-      
+      // 토큰 저장
       if (data.rememberMe) {
-        localStorage.setItem('user', JSON.stringify(updatedUser));
+        localStorage.setItem('user', JSON.stringify(user));
+        localStorage.setItem('auth_token', token);
       } else {
-        sessionStorage.setItem('user', JSON.stringify(updatedUser));
+        sessionStorage.setItem('user', JSON.stringify(user));
+        sessionStorage.setItem('auth_token', token);
       }
-    } catch (error) {
-      throw error;
+      
+    } catch (error: any) {
+      throw new Error(error.message || '로그인에 실패했습니다.');
     } finally {
       setIsLoading(false);
     }
   }, []);
-
   const register = useCallback(async (data: RegisterFormData) => {
     setIsLoading(true);
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      // 클라이언트 검증
       if (data.password !== data.confirmPassword) {
         throw new Error('비밀번호가 일치하지 않습니다.');
       }
@@ -80,50 +51,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error('이용약관에 동의해주세요.');
       }
 
-      if (data.password.length < 8) {
-        throw new Error('비밀번호는 최소 8자 이상이어야 합니다.');
-      }
-
-      const existingUser = MOCK_USERS.find(u => u.email === data.email || u.username === data.username);
-      if (existingUser) {
-        throw new Error('이미 존재하는 이메일 또는 사용자명입니다.');
-      }
-
-      const newUser: User = {
-        id: Date.now().toString(),
+      if (data.password.length < 6) {
+        throw new Error('비밀번호는 최소 6자 이상이어야 합니다.');
+      }      // 백엔드 API 호출
+      const response = await apiService.register({
         username: data.username,
         email: data.email,
-        level: 1,
-        rank: 'Iron 1',
-        createdAt: new Date(),
-        lastLoginAt: new Date(),
-        preferences: {
-          theme: 'dark',
-          language: 'ko',
-          notifications: {
-            email: true,
-            push: true,
-            scenarios: true,
-          },
-          privacy: {
-            showOnlineStatus: true,
-            allowFriendRequests: true,
-          },
-        }
-      };
-
-      setUser(newUser);
-      localStorage.setItem('user', JSON.stringify(newUser));
-    } catch (error) {
-      throw error;
+        password: data.password
+      }) as { user: User; token: string };
+      
+      const { user, token } = response;      setUser(user);
+      
+      // Socket 연결 (토큰과 함께)
+      socketService.connect(token);
+      
+      // 토큰과 사용자 정보 저장
+      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('auth_token', token);
+      
+    } catch (error: any) {
+      throw new Error(error.message || '회원가입에 실패했습니다.');
     } finally {
       setIsLoading(false);
     }
-  }, []);
-  const logout = useCallback(() => {
+  }, []);  const logout = useCallback(() => {
     setUser(null);
+    
+    // 저장된 토큰과 사용자 정보 제거
     localStorage.removeItem('user');
     sessionStorage.removeItem('user');
+    localStorage.removeItem('auth_token');
+    sessionStorage.removeItem('auth_token');
+    
+    // API 서비스에서 토큰 제거
+    apiService.removeToken();
+    
+    // Socket 연결 해제
+    socketService.disconnect();
   }, []);
 
   const updateProfile = useCallback(async (data: ProfileUpdateData) => {
@@ -150,16 +114,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(false);
     }
   }, [user]);
-
   // 앱 시작 시 로컬 스토리지에서 사용자 정보 복원
   useEffect(() => {
     const savedUser = localStorage.getItem('user') || sessionStorage.getItem('user');
-    if (savedUser) {
+    const savedToken = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+    
+    if (savedUser && savedToken) {
       try {
-        setUser(JSON.parse(savedUser));
+        const user = JSON.parse(savedUser);
+        setUser(user);
+        apiService.setToken(savedToken);
+        socketService.connect(savedToken);
       } catch (error) {
         localStorage.removeItem('user');
         sessionStorage.removeItem('user');
+        localStorage.removeItem('auth_token');
+        sessionStorage.removeItem('auth_token');
       }
     }
   }, []);

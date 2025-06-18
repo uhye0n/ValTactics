@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { useScenario } from '../contexts/ScenarioContext';
+import apiService from '../services/api';
 import "./NewScenario/NewScenario.css";
 
 // Import placeholder images - replace with actual paths when available
@@ -424,20 +427,63 @@ export default function NewScenario() {
       });
     }
   };
-
-  const handleGenerateScenario = () => {
+  const handleGenerateScenario = async () => {
     if (!selectedMap || ourAgents.length !== 5 || enemyAgents.length !== 5) {
       alert('맵 1개와 각 팀의 요원 5명을 모두 선택해주세요.');
       return;
     }
 
-    const params = new URLSearchParams({
-      map: mapNameToId[selectedMap],
-      ourTeam: ourAgents.map(agent => agentNameToId[agent]).join(','),
-      enemyTeam: enemyAgents.map(agent => agentNameToId[agent]).join(',')
-    });
+    try {
+      // 백엔드에 시나리오 생성 요청
+      const response = await apiService.createScenario({
+        title: `${selectedMap} 전략`,
+        description: `${selectedMap} 맵에서의 전략 시나리오`,
+        mapId: mapNameToId[selectedMap],
+        mapName: selectedMap,
+        isPublic: false,
+        ourTeam: ourAgents.map((agent, index) => ({
+          agentName: agent,
+          agentRole: getAgentRole(agent), // 요원 역할 함수 필요
+          position: index
+        })),
+        enemyTeam: enemyAgents.map((agent, index) => ({
+          agentName: agent,
+          agentRole: getAgentRole(agent),
+          position: index
+        }))
+      });      const scenario = response as any;
+      
+      // 시나리오 에디터로 이동 (URL 파라미터로 ID 전달)
+      navigate(`/editor/${scenario.id}`);
+      
+    } catch (error: any) {
+      console.error('시나리오 생성 실패:', error);
+      alert(error.message || '시나리오 생성에 실패했습니다.');
+    }
+  };
 
-    navigate(`/scenario-editor?${params.toString()}`);
+  // 요원 역할 결정 함수 (임시)
+  const getAgentRole = (agentName: string): string => {
+    // 실제로는 상수에서 가져와야 함
+    const roles: Record<string, string> = {
+      'Jett': 'Duelist',
+      'Phoenix': 'Duelist', 
+      'Reyna': 'Duelist',
+      'Raze': 'Duelist',
+      'Sage': 'Sentinel',
+      'Killjoy': 'Sentinel',
+      'Cypher': 'Sentinel',
+      'Chamber': 'Sentinel',
+      'Sova': 'Initiator',
+      'Breach': 'Initiator',
+      'Skye': 'Initiator',
+      'KAY/O': 'Initiator',
+      'Omen': 'Controller',
+      'Brimstone': 'Controller',
+      'Viper': 'Controller',
+      'Astra': 'Controller'
+    };
+    return roles[agentName] || 'Duelist';
   };
 
   return (
