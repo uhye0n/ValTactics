@@ -6,6 +6,13 @@
   height: 230px; /* 높이 더 증가 (180px → 230px) */
   display: flex;
   flex-direction: column;
+  font-family: 'Inter', 'Roboto', sans-serif !important;
+  font-weight: 300;
+}
+
+.timeline-editor * {
+  font-family: 'Inter', 'Roboto', sans-serif !important;
+  font-weight: 300;
 }
 
 .timeline-container {
@@ -15,16 +22,17 @@
   border-radius: 0; /* 내부 border-radius 제거 */
   margin: 0; /* 모든 margin 제거 */
   overflow: hidden;
+  padding: 0; /* 패딩 제거 */
 }
 
 .timeline-ruler {
   position: absolute;
   top: 0;
-  left: 0;
-  right: 0;
+  left: 80px; /* 플레이어 헤더 공간을 80px로 조정 */
+  right: 20px; /* 오른쪽 패딩 줄임 */
   height: 30px;
-  background: #16213e;
-  border-bottom: 1px solid #333;
+  background: #1a1a2e; /* 더 어두운 배경 */
+  border-bottom: 1px solid #444; /* 더 명확한 테두리 */
 }
 
 .time-marker {
@@ -33,55 +41,67 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  transform: translateX(-50%); /* 중앙 정렬을 위해 추가 */
 }
 
 .time-line {
   width: 1px;
-  background: #555;
-  height: 15px;
-  margin-top: 5px;
+  background: #888; /* 더 명확한 색상 */
+  height: 20px; /* 높이 증가 */
+  margin-top: 2px;
 }
 
 .time-line.current {
-  background: #007acc;
+  background: #ff4444; /* 현재 시간 표시기 색상과 통일 */
   height: 100%;
-  width: 2px;
+  width: 3px; /* 너비 증가 */
   margin-top: 0;
 }
 
 .time-label {
-  font-size: 10px;
-  color: #aaa;
-  margin-top: 2px;
+  font-size: 9px; /* 폰트 크기 줄임 */
+  color: #ccc; /* 더 밝은 색상 */
+  margin-top: 3px;
   white-space: nowrap;
+  font-family: 'Inter', 'Roboto', sans-serif !important;
+  font-weight: 400;
 }
 
 .current-time-indicator {
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 2px;
-  z-index: 10;
+  width: 3px;
+  z-index: 15;
   pointer-events: none;
+  background: linear-gradient(to bottom, #ff4444, #ff6666);
+  box-shadow: 0 0 8px rgba(255, 68, 68, 0.6);
+  transform: translateX(-50%); /* 중앙 정렬 */
 }
 
 .time-handle {
   position: absolute;
-  top: -4px;
-  left: -6px;
-  width: 12px;
-  height: 12px;
-  background: #007acc;
-  border: 2px solid white;
+  top: -6px;
+  left: -8px;
+  width: 16px;
+  height: 16px;
+  background: #ff4444;
+  border: 3px solid white;
   border-radius: 50%;
   cursor: pointer;
   pointer-events: all;
+  box-shadow: 0 0 8px rgba(255, 68, 68, 0.8);
+  transition: transform 0.2s ease;
+}
+
+.time-handle:hover {
+  transform: scale(1.2);
 }
 
 .timeline-tracks {
   position: absolute;
   top: 30px;
-  left: 0;
+  left: 0; /* 전체 너비 사용 */
   right: 0;
   bottom: 0;
   overflow-y: auto;
@@ -89,19 +109,22 @@
 
 .timeline-track {
   display: flex;
-  height: 50px; /* 높이 증가 (40px → 50px) */
+  height: 40px; /* 높이를 50px에서 40px로 줄임 */
   border-bottom: 1px solid #222;
 }
 
 .track-header {
-  width: 50px; /* 폭 줄임 (120px → 50px) */
+  width: 80px; /* 플레이어 헤더 너비를 120px에서 80px로 줄임 */
   display: flex;
   align-items: center;
-  justify-content: center; /* 중앙 정렬 */
-  padding: 6px;
-  padding: 0 8px;
-  background: #1a1a2e;
-  border-right: 1px solid #333;  flex-shrink: 0;
+  justify-content: center;
+  background: #16213e;
+  border-right: 1px solid #333;
+  flex-shrink: 0; /* 크기 고정 */
+  padding: 4px; /* 패딩도 줄임 */
+  font-family: 'Inter', 'Roboto', sans-serif !important;
+  font-weight: 300 !important;
+  font-size: 10px !important; /* 폰트 크기도 줄임 */
 }
 
 .track-content {
@@ -188,8 +211,8 @@
 .timeline-grid {
   position: absolute;
   top: 30px;
-  left: 120px;
-  right: 0;
+  left: 80px; /* 플레이어 헤더 공간을 80px로 조정 */
+  right: 20px; /* 오른쪽 패딩 줄임 */
   bottom: 0;
   pointer-events: none;
   z-index: 1;
@@ -200,7 +223,8 @@
   top: 0;
   bottom: 0;
   width: 1px;
-  background: #222;
+  background: #333; /* 더 명확한 색상 */
+  transform: translateX(-50%); /* 중앙 정렬 */
 }
 
 /* 스크롤바 스타일링 */

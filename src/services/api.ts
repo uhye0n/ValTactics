@@ -182,6 +182,21 @@ class ApiService {
     })
   }
 
+  // 타임라인 이벤트 추가
+  async addTimelineEvent(scenarioId: string, eventData: {
+    id: string;
+    playerId: string;
+    actionType: string;
+    timestamp: number;
+    position: { x: number; y: number };
+    metadata?: any;
+  }) {
+    return this.request(`/scenarios/${scenarioId}/events`, {
+      method: 'POST',
+      body: JSON.stringify(eventData),
+    })
+  }
+
   // 타임라인 이벤트 업데이트
   async updateTimelineEvent(scenarioId: string, eventId: string, updates: {
     timestamp?: number;

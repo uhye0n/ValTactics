@@ -5,6 +5,13 @@
   flex-direction: column;
   gap: 20px;
   color: white;
+  font-family: 'Inter', 'Roboto', sans-serif;
+  font-weight: 300;
+}
+
+.action-selection-panel * {
+  font-family: 'Inter', 'Roboto', sans-serif;
+  font-weight: 300;
 }
 
 .no-player-selected {
@@ -98,6 +105,13 @@
   gap: 10px;
 }
 
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+
 .action-button {
   display: flex;
   flex-direction: column;
@@ -113,16 +127,43 @@
   overflow: hidden;
 }
 
+.quick-action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 4px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-height: 50px;
+  font-size: 10px;
+  font-weight: 300;
+}
+
 .action-button:hover {
   background: rgba(255, 255, 255, 0.1);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
+.quick-action-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
 .action-button.selected {
   color: white;
   box-shadow: 0 0 20px var(--action-color);
   transform: translateY(-2px);
+}
+
+.quick-action-btn.active {
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+  transform: scale(1.02);
 }
 
 .action-button.selected::before {
@@ -146,6 +187,11 @@
   justify-content: center;
 }
 
+.action-icon {
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
 .action-name {
   font-size: 11px;
   text-align: center;
@@ -155,33 +201,11 @@
   letter-spacing: 0.5px;
 }
 
-/* 액션 지시사항 */
-.action-instructions {
-  padding: 15px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 8px;
+.action-name {
+  font-size: 9px;
+  font-weight: 300;
   text-align: center;
-  animation: pulse 2s infinite;
-}
-
-.action-instructions p {
-  margin: 0;
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-@keyframes pulse {
-  0%, 100% {
-    opacity: 0.8;
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.02);
-  }
+  line-height: 1.2;
 }
 
 /* 스크롤바 스타일링 */

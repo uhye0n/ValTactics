@@ -4,6 +4,7 @@ import './TimelineEditor.css';
 
 interface TimelineEditorProps {
   scenario: Scenario;
+  currentTime?: number;
   onTimeChange: (time: number) => void;
   onActionUpdate: (actionId: string, updates: Partial<PlayerAction>) => void;
   onActionDelete: (actionId: string) => void;
@@ -11,15 +12,14 @@ interface TimelineEditorProps {
 
 const TimelineEditor: React.FC<TimelineEditorProps> = ({
   scenario,
+  currentTime = 0,
   onTimeChange,
   onActionUpdate,
   onActionDelete
 }) => {  const timelineRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragActionId, setDragActionId] = useState<string | null>(null);
-    const duration = scenario.timeline?.duration || 30000; // 기본 30초
-  const currentTime = 0; // 현재 시간은 props로 받거나 상태로 관리해야 함
-
+  const duration = scenario.timeline?.duration || 100000; // 기본 1분 40초
   const formatTime = (milliseconds: number) => {
     const seconds = Math.floor(milliseconds / 1000);
     const minutes = Math.floor(seconds / 60);
@@ -27,14 +27,27 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  const handleTimelineClick = (event: React.MouseEvent<HTMLDivElement>) => {
+  // 요원 이름을 이미지 파일명으로 변환하는 함수
+  const getAgentImageName = (agentName: string) => {
+    if (agentName === 'KAY/O') {
+      return 'Kayo';
+    }
+    return agentName;
+  };const handleTimelineClick = (event: React.MouseEvent<HTMLDivElement>) => {
     if (isDragging || !timelineRef.current) return;
     
     const rect = timelineRef.current.getBoundingClientRect();
     const clickX = event.clientX - rect.left;
-    const timelineWidth = rect.width - 80;
-    const clickRatio = Math.max(0, Math.min(1, (clickX - 40) / timelineWidth));
-    const newTime = clickRatio * duration;
+    const timelineWidth = rect.width;
+    const leftPadding = 80; // 플레이어 헤더 공간을 80px로 조정
+    const rightPadding = 20; // 오른쪽 여백 줄임
+    const activeWidth = timelineWidth - leftPadding - rightPadding;
+    
+    // 클릭 위치가 활성 영역 내에 있는지 확인
+    if (clickX < leftPadding || clickX > timelineWidth - rightPadding) return;
+    
+    const clickRatio = (clickX - leftPadding) / activeWidth;
+    const newTime = Math.max(0, Math.min(duration, clickRatio * duration));
     
     onTimeChange(newTime);
   };
@@ -89,66 +102,70 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
         ref={timelineRef}
         onClick={handleTimelineClick}
         style={{ cursor: isDragging ? 'grabbing' : 'pointer' }}
-      >
-        <div className="timeline-ruler">
-          {Array.from({ length: Math.floor(duration / 10000) + 1 }, (_, i) => {
-            const time = i * 10000;
+      >        <div className="timeline-ruler">
+          {Array.from({ length: 11 }, (_, i) => { // 0초부터 100초까지 10초 간격 (11개 마커)
+            const time = i * 10000; // 10초 간격 (10000ms)
             const position = (time / duration) * 100;
             return (
               <div
                 key={i}
                 className="time-marker"
-                style={{ left: `${40 + position * (100 - 80) / 100}px` }}
+                style={{ left: `${position}%` }}
               >
                 <div className="time-line"></div>
                 <span className="time-label">{formatTime(time)}</span>
               </div>
             );
           })}
+          
+          {/* 현재 시간 표시기를 룰러 내부로 이동 */}
+          <div
+            className="current-time-indicator"
+            style={{
+              left: `${(currentTime / duration) * 100}%`
+            }}
+          >
+            <div className="time-line current"></div>
+            <div className="time-handle"></div>          </div>
         </div>
 
-        <div
-          className="current-time-indicator"
-          style={{
-            left: `${40 + (currentTime / duration) * (100 - 80)}%`
-          }}
-        >
-          <div className="time-line current"></div>
-          <div className="time-handle"></div>
-        </div>
-
-        <div className="timeline-tracks">          {scenario.teams?.map((team) => (
-            <div key={team.id} className="timeline-track">              <div className="track-header">
-                <div 
+        <div className="timeline-tracks">{scenario.teams?.map((team) => (
+            <div key={team.id} className="timeline-track">              <div className="track-header">                <div 
                   className="player-indicator"
                   style={{ 
                     backgroundColor: 'transparent',
                     border: `2px solid ${team.teamType === 'our' ? '#00BFFF' : '#F44336'}`,
-                    padding: '2px',
-                    width: '28px',
-                    height: '28px',
+                    padding: '1px', /* 패딩 줄임 */
+                    width: '24px', /* 크기 줄임 */
+                    height: '24px',
                     borderRadius: '50%',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center'
                   }}
-                >
-                  <img 
-                    src={`/resources/images/agent/${team.agentName}.png`}
+                >                  <img 
+                    src={`/resources/images/agent/${getAgentImageName(team.agentName)}.png`}
                     alt={team.agentName}
                     style={{
-                      width: '24px',
-                      height: '24px',
+                      width: '20px', /* 24px에서 20px로 줄임 */
+                      height: '20px',
                       borderRadius: '50%',
                       objectFit: 'cover'
                     }}
                     onError={(e) => {
-                      // 이미지 로드 실패 시 텍스트로 대체
-                      e.currentTarget.style.display = 'none';
+                      // 이미지 로드 실패 시 대체 이미지 시도
+                      const target = e.currentTarget;
+                      if (!target.dataset.retried) {
+                        target.dataset.retried = 'true';
+                        target.src = `/resources/images/agent/${team.agentName.replace('/', '')}.png`;
+                        return;
+                      }
+                      // 최종 실패 시 텍스트로 대체
+                      target.style.display = 'none';
                       const fallbackDiv = document.createElement('div');
-                      fallbackDiv.style.cssText = 'font-size: 10px; color: white; text-align: center; font-weight: bold;';
+                      fallbackDiv.style.cssText = 'font-size: 8px; color: white; text-align: center; font-weight: bold;';
                       fallbackDiv.textContent = team.agentName.substring(0, 2).toUpperCase();
-                      e.currentTarget.parentNode?.appendChild(fallbackDiv);
+                      target.parentNode?.appendChild(fallbackDiv);
                     }}
                   />
                 </div>
@@ -160,7 +177,7 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
                       key={event.id}
                       className={`action-marker ${dragActionId === event.id ? 'dragging' : ''}`}
                       style={{
-                        left: `${40 + position * (100 - 80) / 100}px`,
+                        left: `${position}%`, /* 단순화된 위치 계산 */
                         backgroundColor: getActionColor(event.eventType || 'unknown')
                       }}
                       onMouseDown={(e) => handleActionDragStart(event.id, e)}
@@ -186,14 +203,13 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
               </div>
             </div>
           ))}
-        </div>
-
-        <div className="timeline-grid">
-          {Array.from({ length: 20 }, (_, i) => (
+        </div>        <div className="timeline-grid">
+          {Array.from({ length: 11 }, (_, i) => ( // 시간 마커와 동일하게 11개
             <div
               key={i}
               className="grid-line"
-              style={{ left: `${40 + (i * 5)}%` }}            ></div>
+              style={{ left: `${(i * 10)}%` }} // 10% 간격으로 수정
+            ></div>
           ))}
         </div>
       </div>

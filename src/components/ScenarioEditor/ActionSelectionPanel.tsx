@@ -6,12 +6,16 @@ interface ActionSelectionPanelProps {
   selectedPlayer: Player | null;
   selectedAction: string | null;
   onActionSelect: (actionType: string) => void;
+  actionMode: string;
+  onActionModeChange: (mode: 'select' | 'move' | 'run' | 'skill') => void;
 }
 
 const ActionSelectionPanel: React.FC<ActionSelectionPanelProps> = ({
   selectedPlayer,
   selectedAction,
-  onActionSelect
+  onActionSelect,
+  actionMode,
+  onActionModeChange
 }) => {
   if (!selectedPlayer) {
     return (
@@ -23,94 +27,72 @@ const ActionSelectionPanel: React.FC<ActionSelectionPanelProps> = ({
     );
   }
 
-  const actionCategories = [
-    {
-      name: '이동',
-      icon: '🚶',
-      actions: [
-        { id: 'move', name: '이동', icon: '🚶', color: '#4ecdc4' },
-        { id: 'crouch_move', name: '숨어서 이동', icon: '🦆', color: '#26d0ce' },
-        { id: 'run', name: '달리기', icon: '🏃', color: '#1dd1a1' }
-      ]
-    },
-    {
-      name: '스킬',
-      icon: '⚡',
-      actions: [
-        { id: 'ability_1', name: 'Q 스킬', icon: 'Q', color: '#feca57' },
-        { id: 'ability_2', name: 'E 스킬', icon: 'E', color: '#ff9ff3' },
-        { id: 'ability_3', name: 'C 스킬', icon: 'C', color: '#ff6b6b' }, // 파란색에서 붉은색으로 변경
-        { id: 'ultimate', name: '궁극기 (X)', icon: 'X', color: '#ee5a24' }
-      ]
-    },
-    {
-      name: '전투',
-      icon: '🎯',
-      actions: [
-        { id: 'shoot', name: '사격', icon: '🎯', color: '#ff6b6b' },
-        { id: 'aim', name: '조준', icon: '🔍', color: '#ffa726' },
-        { id: 'reload', name: '재장전', icon: '🔄', color: '#66bb6a' },
-        { id: 'melee', name: '근접 공격', icon: '🗡️', color: '#ab47bc' }
-      ]
-    },
-    {
-      name: '특수',
-      icon: '🛠️',
-      actions: [
-        { id: 'plant', name: '스파이크 설치', icon: '💣', color: '#f44336' },
-        { id: 'defuse', name: '스파이크 해체', icon: '🔧', color: '#ff4757' }, // 파란색에서 붉은색으로 변경
-        { id: 'peek', name: '피킹', icon: '👁️', color: '#ff9800' },
-        { id: 'hide', name: '숨기', icon: '🫥', color: '#607d8b' }
-      ]
-    }
+  const quickActions = [
+    { id: 'move', name: '걷기', icon: '🚶', color: '#00BFFF' },
+    { id: 'run', name: '달리기', icon: '🏃', color: '#FFA500' },
+    { id: 'skill_q', name: 'Q 스킬', icon: 'Q', color: '#FF69B4' },
+    { id: 'skill_e', name: 'E 스킬', icon: 'E', color: '#FF69B4' },
+    { id: 'skill_c', name: 'C 스킬', icon: 'C', color: '#FF69B4' },
+    { id: 'skill_x', name: '궁극기', icon: 'X', color: '#FF0000' },
+    { id: 'plant', name: '스파이크 설치', icon: '💣', color: '#32CD32' },
+    { id: 'defuse', name: '스파이크 해체', icon: '🛡️', color: '#1E90FF' }
   ];
+
+  const handleActionClick = (actionId: string) => {
+    if (actionId === 'move' || actionId === 'run') {
+      onActionModeChange(actionId as 'move' | 'run');
+    } else if (actionId.startsWith('skill_')) {
+      onActionModeChange('skill');
+      onActionSelect(actionId);
+    } else {
+      onActionSelect(actionId);
+    }
+  };
 
   return (
     <div className="action-selection-panel">
       <div className="selected-player-info">
-        <div className="player-avatar" style={{ backgroundColor: selectedPlayer.color }}>
-          {selectedPlayer.agent.charAt(0)}
+        <div className="player-avatar">
+          <img 
+            src={`/resources/images/agent/${selectedPlayer.agent}.png`}
+            alt={selectedPlayer.agent}
+            onError={(e) => {
+              e.currentTarget.src = '/resources/images/agent/default.png';
+            }}
+          />
         </div>
         <div className="player-details">
           <h3>{selectedPlayer.name}</h3>
-          <p>{selectedPlayer.agent}</p>
+          <p>{selectedPlayer.agent} - {selectedPlayer.role}</p>
         </div>
       </div>
 
-      <div className="action-categories">
-        {actionCategories.map(category => (
-          <div key={category.name} className="action-category">
-            <div className="category-header">
-              <span className="category-icon">{category.icon}</span>
-              <h4 className="category-name">{category.name}</h4>
-            </div>
+      <div className="quick-actions">
+        <h4>빠른 액션</h4>
+        <div className="action-grid">
+          {quickActions.map((action) => {
+            const isActive = (action.id === 'move' && actionMode === 'move') ||
+                           (action.id === 'run' && actionMode === 'run') ||
+                           (action.id.startsWith('skill_') && actionMode === 'skill' && selectedAction === action.id);
             
-            <div className="actions-grid">
-              {category.actions.map(action => (
-                <button
-                  key={action.id}
-                  className={`action-button ${selectedAction === action.id ? 'selected' : ''}`}
-                  onClick={() => onActionSelect(action.id)}
-                  style={{ 
-                    '--action-color': action.color,
-                    backgroundColor: selectedAction === action.id ? action.color : 'transparent',
-                    borderColor: action.color 
-                  } as React.CSSProperties}
-                >
-                  <div className="action-icon">{action.icon}</div>
-                  <div className="action-name">{action.name}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-        ))}
+            return (
+              <button
+                key={action.id}
+                className={`quick-action-btn ${isActive ? 'active' : ''}`}
+                onClick={() => handleActionClick(action.id)}
+                style={{
+                  backgroundColor: isActive ? action.color : 'rgba(255, 255, 255, 0.1)',
+                  borderColor: action.color,
+                  color: isActive ? 'white' : action.color
+                }}
+                title={action.name}
+              >
+                <span className="action-icon">{action.icon}</span>
+                <span className="action-name">{action.name}</span>
+              </button>
+            );
+          })}        </div>
       </div>
-
-      {selectedAction && (
-        <div className="action-instructions">
-          <p>맵에서 위치를 클릭하여 액션을 추가하세요</p>
-        </div>
-      )}
     </div>
   );
 };

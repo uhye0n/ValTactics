@@ -1,3 +1,7 @@
+/* 전역 폰트 설정 - 가시성 좋은 얇은 폰트 */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700&display=swap');
+
 /* 시나리오 에디터 메인 CSS - ValTactics 스타일 */
 
 /* 전체 레이아웃 */
@@ -8,7 +12,8 @@
   min-width: 1200px; /* 최소 너비 설정 */
   height: 100vh;
   margin: 0 auto; /* 중앙 정렬로 좌우 여백 생성 */
-  font-family: 'Fascinate', sans-serif;
+  font-family: 'Inter', 'Roboto', sans-serif; /* 가시성 좋은 얇은 폰트 */
+  font-weight: 300; /* 얇은 굵기 */
   overflow: hidden;
 }
 
@@ -39,12 +44,13 @@
 }
 
 .editor-title {
-  font-family: 'Fascinate', sans-serif;
-  font-size: 32px;
+  font-family: 'Inter', 'Roboto', sans-serif;
+  font-size: 28px;
+  font-weight: 300; /* 얇은 굵기 */
   color: #ffffff;
-  text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+  text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
   margin: 0;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
 }
 
 .scenario-info {
@@ -91,7 +97,7 @@
   min-width: 900px; /* 최소 너비를 800px에서 900px로 증가 */
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 0; /* gap을 0으로 설정하여 맵과 재생 컨트롤 사이 공간 제거 */
 }
 
 .map-container {
@@ -279,6 +285,129 @@ body.map-active {
     transform: scale(1);
     opacity: 1;
   }
+}
+
+/* 시나리오 에디터 메인 CSS - ValTactics 스타일 */
+
+/* 스킬 효과 애니메이션 */
+@keyframes skillPulse {
+  0% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+  100% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* 이동 경로 스타일 */
+.movement-path {
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+  transition: opacity 0.3s ease;
+}
+
+.movement-path:hover {
+  opacity: 1 !important;
+}
+
+/* 스킬 효과 스타일 */
+.skill-effect {
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+/* 재생 컨트롤 스타일 */
+.playback-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  padding: 10px 20px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+  margin-top: 0; /* margin-top을 0으로 설정하여 맵과 재생 컨트롤 사이 공간 제거 */
+}
+
+.playback-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: white;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  min-width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.playback-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.playback-btn.playing {
+  background: rgba(255, 0, 0, 0.3);
+  border-color: rgba(255, 0, 0, 0.5);
+}
+
+.time-display {
+  color: white;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 0 15px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  min-width: 80px;
+  text-align: center;
+}
+
+.action-mode-display {
+  color: white;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.mode-indicator {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.mode-indicator.select {
+  background: rgba(128, 128, 128, 0.3);
+  color: #ccc;
+}
+
+.mode-indicator.move {
+  background: rgba(0, 191, 255, 0.3);
+  color: #00BFFF;
+}
+
+.mode-indicator.run {
+  background: rgba(255, 165, 0, 0.3);
+  color: #FFA500;
+}
+
+.mode-indicator.skill {
+  background: rgba(255, 0, 255, 0.3);
+  color: #FF00FF;
 }
 
 /* 타임라인 섹션 */

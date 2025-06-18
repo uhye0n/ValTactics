@@ -206,7 +206,7 @@ router.post('/', async (req: any, res) => {
           ]
         },        timeline: {
           create: {
-            duration: 30000, // 기본 30초
+            duration: 100000, // 1분 40초 (100초)
             rounds: 1
           }
         }
@@ -308,6 +308,51 @@ router.post('/:id/actions', async (req: any, res) => {
   }
 })
 
+// 타임라인 이벤트 추가
+router.post('/:id/events', async (req: any, res) => {
+  try {
+    const scenarioId = req.params.id;
+    const { id: eventId, playerId, actionType, timestamp, position, metadata } = req.body;
+    
+    console.log('타임라인 이벤트 추가:', { scenarioId, eventId, playerId, actionType, timestamp });
+    
+    // 시나리오의 타임라인 찾기
+    const scenario = await (prisma.scenario as any).findUnique({
+      where: { id: scenarioId },
+      include: { timeline: true }
+    });
+    
+    if (!scenario) {
+      return res.status(404).json({ error: '시나리오를 찾을 수 없습니다.' });
+    }
+    
+    if (!scenario.timeline) {
+      return res.status(404).json({ error: '타임라인을 찾을 수 없습니다.' });
+    }
+    
+    // 타임라인 이벤트 생성
+    const event = await (prisma as any).timelineEvent.create({
+      data: {
+        id: eventId,
+        timelineId: scenario.timeline.id,
+        eventType: actionType,
+        timestamp: timestamp,
+        description: `${actionType} action`,
+        data: {
+          playerId: playerId,
+          position: position,
+          ...metadata
+        }
+      }
+    });
+    
+    console.log('타임라인 이벤트 추가 성공:', event.id);
+    res.status(201).json(event);  } catch (error) {
+    console.error('Error adding timeline event:', error);
+    return res.status(500).json({ error: '타임라인 이벤트 추가에 실패했습니다.' });
+  }
+})
+
 // 타임라인 이벤트 업데이트
 router.put('/:id/events/:eventId', async (req, res) => {
   try {
@@ -336,10 +381,9 @@ router.put('/:id/events/:eventId', async (req, res) => {
     });
     
     console.log('타임라인 이벤트 업데이트 성공:', updatedEvent.id);
-    res.json(updatedEvent);
-  } catch (error) {
+    res.json(updatedEvent);  } catch (error) {
     console.error('Error updating timeline event:', error);
-    res.status(500).json({ error: '타임라인 이벤트 업데이트에 실패했습니다.' });
+    return res.status(500).json({ error: '타임라인 이벤트 업데이트에 실패했습니다.' });
   }
 });
 
@@ -366,10 +410,9 @@ router.delete('/:id/events/:eventId', async (req, res) => {
     });
     
     console.log('타임라인 이벤트 삭제 성공:', eventId);
-    res.status(204).send();
-  } catch (error) {
+    res.status(204).send();  } catch (error) {
     console.error('Error deleting timeline event:', error);
-    res.status(500).json({ error: '타임라인 이벤트 삭제에 실패했습니다.' });
+    return res.status(500).json({ error: '타임라인 이벤트 삭제에 실패했습니다.' });
   }
 });
 

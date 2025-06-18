@@ -10,6 +10,14 @@ import PlaybackControls from './PlaybackControls';
 import apiService from '../../services/api';
 import './ScenarioEditorComplete.css';
 
+// 요원 이름을 이미지 파일명으로 변환하는 함수
+const getAgentImageName = (agentName: string): string => {
+  if (agentName === 'KAY/O') {
+    return 'Kayo';
+  }
+  return agentName;
+};
+
 const ScenarioEditor: React.FC = () => {
   const { scenarioId } = useParams<{ scenarioId: string }>();
   const navigate = useNavigate();
@@ -18,16 +26,23 @@ const ScenarioEditor: React.FC = () => {
   const [rightPanelMode, setRightPanelMode] = useState<'players' | 'actions'>('players');
   const [loadError, setLoadError] = useState<string | null>(null);
   
+  // 시뮬레이션 상태
+  const [currentTime, setCurrentTime] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [actionMode, setActionMode] = useState<'select' | 'move' | 'run' | 'skill'>('select');
+  
   // 맵 팬 기능을 위한 상태
   const [mapOffset, setMapOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
-  const [mapScale, setMapScale] = useState(1.2); // 초기 스케일을 1에서 1.2로 증가
+  const [mapScale, setMapScale] = useState(1.2);
   const mapContainerRef = useRef<HTMLDivElement>(null);
 
   // 플레이어 위치 상태 관리
   const [playerPositions, setPlayerPositions] = useState<{ [playerId: string]: { x: number, y: number } }>({});
   const [draggedPlayer, setDraggedPlayer] = useState<string | null>(null);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  // 이동 경로 및 스킬 효과
+  const [movementPaths, setMovementPaths] = useState<{ [playerId: string]: Array<{x: number, y: number, time: number}> }>({});
+  const [skillEffects, setSkillEffects] = useState<Array<{id: string, playerId: string, x: number, y: number, startTime: number, duration: number}>>([]);
   // 시나리오 로드
   useEffect(() => {
     if (!scenarioId) {
@@ -47,6 +62,93 @@ const ScenarioEditor: React.FC = () => {
 
     loadScenarioData();
   }, [scenarioId, loadScenario]);
+
+  // 스킬 효과 정리 - 시간이 지나면 자동으로 제거
+  useEffect(() => {
+    const cleanupSkills = () => {
+      setSkillEffects(prev => prev.filter(skill => 
+        currentTime < skill.startTime + skill.duration
+      ));
+    };
+
+    const interval = setInterval(cleanupSkills, 1000); // 1초마다 체크
+    return () => clearInterval(interval);
+  }, [currentTime]);  // 플레이어 위치 초기화
+  useEffect(() => {
+    if (currentScenario && currentScenario.teams) {
+      const initialPositions: { [playerId: string]: { x: number, y: number } } = {};
+      const teams = currentScenario.teams;
+      
+      teams.forEach((team) => {
+        const isOurTeam = team.teamType === 'our';
+        const teamPlayers = teams.filter(t => t.teamType === team.teamType);
+        const teamIndex = teamPlayers.indexOf(team);
+        
+        if (isOurTeam) {
+          // 아군: 상단 중앙에 가로로 배치 (y=10, x=20~80 사이에 5명)
+          const baseX = 30 + (teamIndex * 10); // 30, 40, 50, 60, 70
+          const baseY = 10;
+          initialPositions[team.id] = { x: baseX, y: baseY };
+        } else {
+          // 적군: 하단 중앙에 가로로 배치 (y=85, x=20~80 사이에 5명)
+          const baseX = 30 + (teamIndex * 10); // 30, 40, 50, 60, 70
+          const baseY = 85;
+          initialPositions[team.id] = { x: baseX, y: baseY };
+        }
+      });
+      
+      setPlayerPositions(initialPositions);
+    }
+  }, [currentScenario]);
+
+  // 애니메이션 및 시뮬레이션 관리
+  useEffect(() => {
+    if (!isPlaying) return;
+
+    const interval = setInterval(() => {
+      setCurrentTime(prev => {
+        const newTime = prev + 100; // 100ms씩 증가
+        
+        // 타임라인 끝에 도달하면 정지
+        if (newTime >= 100000) { // 100초 = 100000ms
+          setIsPlaying(false);
+          return 100000;
+        }
+        
+        return newTime;
+      });
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [isPlaying]);
+
+  // 플레이어 위치를 시간에 따라 업데이트
+  useEffect(() => {
+    const updatedPositions: { [playerId: string]: { x: number, y: number } } = {};
+    
+    Object.entries(movementPaths).forEach(([playerId, path]) => {
+      if (path.length === 0) return;
+      
+      // 현재 시간에 해당하는 위치 계산
+      let targetPosition = null;
+      for (let i = 0; i < path.length; i++) {
+        if (path[i].time <= currentTime) {
+          targetPosition = path[i];
+        } else {
+          break;
+        }
+      }
+      
+      if (targetPosition) {
+        updatedPositions[playerId] = { x: targetPosition.x, y: targetPosition.y };
+      }
+    });
+    
+    // 새로운 위치가 있는 경우에만 업데이트
+    if (Object.keys(updatedPositions).length > 0) {
+      setPlayerPositions(prev => ({ ...prev, ...updatedPositions }));
+    }
+  }, [currentTime, movementPaths]);
 
   // 키보드 이벤트 핸들러 (스킬 사용 등)
   useEffect(() => {
@@ -225,17 +327,91 @@ const ScenarioEditor: React.FC = () => {
         y: Math.min(Math.max(prev.y, -maxOffsetY), maxOffsetY)
       }));
     }
-  };  const handleMapClick = (position: Position) => {
-    if (selectedPlayerId && selectedAction && currentScenario) {
-      // 액션 추가 로직은 나중에 구현
-      console.log('Action added:', { playerId: selectedPlayerId, action: selectedAction, position });
+  };  const handleMapClick = (e: React.MouseEvent) => {
+    if (!selectedPlayerId || actionMode === 'select' || draggedPlayer) return;
+    
+    const mapContainer = mapContainerRef.current;
+    if (!mapContainer) return;
+    
+    const mapOverlay = mapContainer.querySelector('.map-overlay') as HTMLElement;
+    if (!mapOverlay) return;
+    
+    const overlayRect = mapOverlay.getBoundingClientRect();
+    const clickX = e.clientX - overlayRect.left;
+    const clickY = e.clientY - overlayRect.top;
+    
+    const percentX = (clickX / overlayRect.width) * 100;
+    const percentY = (clickY / overlayRect.height) * 100;
+    
+    const clampedX = Math.max(0, Math.min(100, percentX));
+    const clampedY = Math.max(0, Math.min(100, percentY));
+      if (actionMode === 'move' || actionMode === 'run') {
+      // 이동 액션 생성
+      const currentPos = getPlayerPosition(players.find(p => p.id === selectedPlayerId));
+      const newPath = {
+        x: clampedX,
+        y: clampedY,
+        time: currentTime
+      };
       
-      // 액션 추가 후 다시 플레이어 선택 모드로
+      // 이동 경로 추가
+      setMovementPaths(prev => ({
+        ...prev,
+        [selectedPlayerId]: [...(prev[selectedPlayerId] || []), newPath]
+      }));
+      
+      // 플레이어 위치 업데이트
+      setPlayerPositions(prev => ({
+        ...prev,
+        [selectedPlayerId]: { x: clampedX, y: clampedY }
+      }));
+        // 타임라인에 이동 액션 기록
+      recordPlayerAction(selectedPlayerId, 'move', { x: clampedX, y: clampedY }, {
+        fromX: currentPos.x,
+        fromY: currentPos.y,
+        duration: actionMode === 'run' ? 2000 : 4000, // 달리기는 2초, 걷기는 4초
+        moveType: actionMode
+      });
+      
+    } else if (actionMode === 'skill') {
+      // 스킬 효과 생성
+      const skillId = Date.now().toString();
+      const skillType = selectedAction || 'skill_q'; // 기본값
+      const newSkill = {
+        id: skillId,
+        playerId: selectedPlayerId,
+        x: clampedX,
+        y: clampedY,
+        startTime: currentTime,
+        duration: 15000 // 15초 지속
+      };
+      
+      setSkillEffects(prev => [...prev, newSkill]);
+      
+      // 타임라인에 스킬 액션 기록
+      recordPlayerAction(selectedPlayerId, 'skill', { x: clampedX, y: clampedY }, {
+        skillId,
+        skillType,
+        duration: 15000
+      });
+    } else if (selectedAction === 'plant') {
+      // 스파이크 설치
+      recordPlayerAction(selectedPlayerId, 'plant', { x: clampedX, y: clampedY }, {
+        duration: 4000 // 4초 소요
+      });
+    } else if (selectedAction === 'defuse') {
+      // 스파이크 해체
+      recordPlayerAction(selectedPlayerId, 'defuse', { x: clampedX, y: clampedY }, {
+        duration: 7000 // 7초 소요 (절반은 3.5초)
+      });    }
+    
+    // 일회성 액션(스킬, 설치, 해체)의 경우에만 액션 모드를 선택으로 되돌리기
+    if (actionMode === 'skill' || selectedAction === 'plant' || selectedAction === 'defuse') {
+      setActionMode('select');
       setSelectedAction(null);
-      setRightPanelMode('players');
     }
   };
-  
+
   // teams 데이터를 Player 배열로 변환하는 함수
   const convertTeamsToPlayers = (teams: any[] = []): Player[] => {
     return teams.map((team) => ({
@@ -302,7 +478,6 @@ const ScenarioEditor: React.FC = () => {
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
   };
-
   // 플레이어 위치 계산 함수
   const getPlayerPosition = (player: any) => {
     // 사용자가 이동시킨 위치가 있으면 그것을 사용
@@ -312,13 +487,20 @@ const ScenarioEditor: React.FC = () => {
     
     // 기본 위치 계산
     const isOurTeam = player.team === 'our';
-    const teamIndex = isOurTeam 
-      ? players.filter(p => p.team === 'our').indexOf(player)
-      : players.filter(p => p.team === 'enemy').indexOf(player);
-      const baseX = isOurTeam ? 15 : 75;
-    const baseY = 10 + (teamIndex * 10);
+    const teamPlayers = players.filter(p => p.team === player.team);
+    const teamIndex = teamPlayers.indexOf(player);
     
-    return { x: baseX, y: baseY };
+    if (isOurTeam) {
+      // 아군: 상단 중앙에 가로로 배치
+      const baseX = 30 + (teamIndex * 10);
+      const baseY = 10;
+      return { x: baseX, y: baseY };
+    } else {
+      // 적군: 하단 중앙에 가로로 배치
+      const baseX = 30 + (teamIndex * 10);
+      const baseY = 85;
+      return { x: baseX, y: baseY };
+    }
   };
   // 플레이어 위치 리셋 함수
   const resetPlayerPosition = (playerId: string) => {
@@ -362,18 +544,81 @@ const ScenarioEditor: React.FC = () => {
                     alt={`${currentScenario.title} Map`}
                     className="map-image"
                     draggable={false}
-                  />
-                  <div 
+                  />                  <div 
                     className="map-overlay" 
-                    onClick={(e) => {
-                      if (selectedPlayerId && selectedAction) {
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        const x = ((e.clientX - rect.left) / rect.width) * 100;
-                        const y = ((e.clientY - rect.top) / rect.height) * 100;
-                        handleMapClick({ x, y });
+                    onClick={handleMapClick}
+                  >
+                    {/* 이동 경로 시각화 */}
+                    {Object.entries(movementPaths).map(([playerId, path]) => {
+                      if (path.length < 2) return null;
+                      
+                      const player = players.find(p => p.id === playerId);
+                      if (!player) return null;
+                      
+                      const pathElements = [];
+                      for (let i = 0; i < path.length - 1; i++) {
+                        const startPoint = path[i];
+                        const endPoint = path[i + 1];
+                        
+                        const deltaX = endPoint.x - startPoint.x;
+                        const deltaY = endPoint.y - startPoint.y;
+                        const length = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                        const angle = Math.atan2(deltaY, deltaX) * 180 / Math.PI;
+                        
+                        pathElements.push(
+                          <div
+                            key={`${playerId}-path-${i}`}
+                            className="movement-path"
+                            style={{
+                              position: 'absolute',
+                              left: `${startPoint.x}%`,
+                              top: `${startPoint.y}%`,
+                              width: `${length}%`,
+                              height: '2px',
+                              backgroundColor: player.team === 'our' ? '#00BFFF' : '#F44336',
+                              transformOrigin: '0 50%',
+                              transform: `rotate(${angle}deg)`,
+                              opacity: 0.8,
+                              pointerEvents: 'none',
+                              zIndex: 5
+                            }}
+                          />
+                        );
                       }
-                    }}
-                  >                    {/* 플레이어 마커들이 여기에 렌더링됩니다 */}                    {players.map((player) => {
+                      return pathElements;
+                    })}
+                    
+                    {/* 스킬 효과 시각화 */}
+                    {skillEffects.map((skill) => {
+                      const player = players.find(p => p.id === skill.playerId);
+                      if (!player) return null;
+                      
+                      const isActive = currentTime >= skill.startTime && currentTime <= skill.startTime + skill.duration;
+                      if (!isActive) return null;
+                      
+                      return (
+                        <div
+                          key={`skill-${skill.id}`}
+                          className="skill-effect"
+                          style={{
+                            position: 'absolute',
+                            left: `${skill.x}%`,
+                            top: `${skill.y}%`,
+                            transform: 'translate(-50%, -50%)',
+                            width: '90px', // 플레이어 아이콘의 2배 크기
+                            height: '90px',
+                            borderRadius: '50%',
+                            backgroundColor: `${player.team === 'our' ? '#00BFFF' : '#F44336'}33`, // 반투명
+                            border: `3px solid ${player.team === 'our' ? '#00BFFF' : '#F44336'}`,
+                            pointerEvents: 'none',
+                            zIndex: 8,
+                            animation: 'skillPulse 2s infinite'
+                          }}
+                        />
+                      );
+                    })}
+
+                    {/* 플레이어 마커들이 여기에 렌더링됩니다 */}{players.map((player) => {
                       const position = getPlayerPosition(player);
                       const teamIndex = player.team === 'our' 
                         ? players.filter(p => p.team === 'our').indexOf(player)
@@ -420,9 +665,8 @@ const ScenarioEditor: React.FC = () => {
                             e.preventDefault();
                             resetPlayerPosition(player.id);
                           }}                          title={`${player.name} (${player.agent} - ${player.role}) - 우클릭으로 위치 리셋`}
-                        >
-                          <img 
-                            src={`/resources/images/agent/${player.agent}.png`}
+                        >                          <img 
+                            src={`/resources/images/agent/${getAgentImageName(player.agent)}.png`}
                             alt={player.agent}
                             style={{
                               width: '35px',
@@ -464,12 +708,49 @@ const ScenarioEditor: React.FC = () => {
                 </div>
               </div>
             </div>
-              {/* 하단 타임라인 */}
+            
+            {/* 재생 컨트롤 */}
+            <div className="playback-controls">
+              <button 
+                className={`playback-btn ${isPlaying ? 'playing' : 'paused'}`}
+                onClick={() => setIsPlaying(!isPlaying)}
+                title={isPlaying ? '일시정지' : '재생'}
+              >
+                {isPlaying ? '⏸️' : '▶️'}
+              </button>
+              
+              <button 
+                className="playback-btn"
+                onClick={() => {
+                  setCurrentTime(0);
+                  setIsPlaying(false);
+                }}
+                title="처음으로"
+              >
+                ⏮️
+              </button>
+              
+              <div className="time-display">
+                {Math.floor(currentTime / 1000)}s / 100s
+              </div>
+              
+              <div className="action-mode-display">
+                <span>액션 모드: </span>
+                <span className={`mode-indicator ${actionMode}`}>
+                  {actionMode === 'select' ? '선택' : 
+                   actionMode === 'move' ? '걷기' :
+                   actionMode === 'run' ? '달리기' : '스킬'}
+                </span>
+              </div>
+            </div>
+
+            {/* 하단 타임라인 */}
             <div className="timeline-section">              <TimelineEditor
                 scenario={currentScenario}
+                currentTime={currentTime}
                 onTimeChange={(time: number) => {
                   console.log('Timeline time changed to:', time);
-                  // 필요시 시나리오의 현재 시간 업데이트
+                  setCurrentTime(time); // 현재 시간 상태 업데이트
                 }}
                 onActionUpdate={async (actionId, updates) => {
                   try {
@@ -520,12 +801,13 @@ const ScenarioEditor: React.FC = () => {
                   players={players}
                   selectedPlayerId={selectedPlayerId}
                   onPlayerSelect={handlePlayerSelect}
-                />
-              ) : (
+                />              ) : (
                 <ActionSelectionPanel
                   selectedPlayer={selectedPlayer}
                   selectedAction={selectedAction}
                   onActionSelect={handleActionSelect}
+                  actionMode={actionMode}
+                  onActionModeChange={setActionMode}
                 />
               )}
             </div>

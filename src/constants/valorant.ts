@@ -92,7 +92,7 @@ export const VALORANT_MAPS: MapData[] = [
 
 export const VALORANT_AGENTS = [
   'Brimstone', 'Viper', 'Omen', 'Killjoy', 'Cypher', 'Sova', 'Sage', 'Phoenix',
-  'Jett', 'Reyna', 'Raze', 'Breach', 'Skye', 'Yoru', 'Astra', 'KAY/O',
+  'Jett', 'Reyna', 'Raze', 'Breach', 'Skye', 'Yoru', 'Astra', 'Kayo',
   'Chamber', 'Neon', 'Fade', 'Harbor', 'Gekko', 'Deadlock', 'Iso', 'Clove'
 ] as const;
 
@@ -135,7 +135,7 @@ export const AGENT_SKILLS: Record<ValorantAgent, Skill[]> = {
   'Skye': [],
   'Yoru': [],
   'Astra': [],
-  'KAY/O': [],
+  'Kayo': [],
   'Chamber': [],
   'Neon': [],
   'Fade': [],
