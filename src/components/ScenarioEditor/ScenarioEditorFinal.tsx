@@ -383,10 +383,9 @@ const ScenarioEditor: React.FC = () => {
                       
                       return (
                         <div
-                          key={player.id}
-                          className={`player-marker ${selectedPlayerId === player.id ? 'selected' : ''} ${isDragging ? 'dragging' : ''}`}
+                          key={player.id}                          className={`player-marker ${selectedPlayerId === player.id ? 'selected' : ''} ${isDragging ? 'dragging' : ''}`}
                           style={{
-                            backgroundColor: player.color,
+                            backgroundColor: 'transparent', // 배경을 투명하게
                             position: 'absolute',
                             left: `${position.x}%`,
                             top: `${position.y}%`,
@@ -401,7 +400,7 @@ const ScenarioEditor: React.FC = () => {
                             color: 'white',
                             fontWeight: 'bold',
                             fontSize: '10px',
-                            border: player.team === 'our' ? '3px solid #4CAF50' : '3px solid #F44336',
+                            border: player.team === 'our' ? '3px solid #00BFFF' : '3px solid #F44336', // 하늘색으로 변경
                             cursor: isDragging ? 'grabbing' : 'grab',
                             zIndex: isDragging ? 20 : 10,
                             boxShadow: isDragging 
@@ -420,13 +419,42 @@ const ScenarioEditor: React.FC = () => {
                           onContextMenu={(e) => {
                             e.preventDefault();
                             resetPlayerPosition(player.id);
-                          }}
-                          title={`${player.name} (${player.agent} - ${player.role}) - 우클릭으로 위치 리셋`}
+                          }}                          title={`${player.name} (${player.agent} - ${player.role}) - 우클릭으로 위치 리셋`}
                         >
-                          <div style={{ fontSize: '12px', lineHeight: '1' }}>
-                            {player.agent.substring(0, 3).toUpperCase()}
-                          </div>
-                          <div style={{ fontSize: '8px', lineHeight: '1', opacity: 0.8 }}>
+                          <img 
+                            src={`/resources/images/agent/${player.agent}.png`}
+                            alt={player.agent}
+                            style={{
+                              width: '35px',
+                              height: '35px',
+                              borderRadius: '50%',
+                              objectFit: 'cover',
+                              pointerEvents: 'none'
+                            }}
+                            onError={(e) => {
+                              // 이미지 로드 실패 시 텍스트로 대체
+                              e.currentTarget.style.display = 'none';
+                              const fallbackDiv = document.createElement('div');
+                              fallbackDiv.style.cssText = 'font-size: 12px; line-height: 1; text-align: center; color: white;';
+                              fallbackDiv.textContent = player.agent.substring(0, 3).toUpperCase();
+                              e.currentTarget.parentNode?.appendChild(fallbackDiv);
+                            }}
+                          />
+                          <div style={{ 
+                            position: 'absolute', 
+                            bottom: '-2px', 
+                            right: '-2px',
+                            fontSize: '8px', 
+                            lineHeight: '1', 
+                            backgroundColor: 'rgba(0,0,0,0.8)',
+                            color: 'white',
+                            borderRadius: '50%',
+                            width: '14px',
+                            height: '14px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}>
                             {teamIndex + 1}
                           </div>
                         </div>

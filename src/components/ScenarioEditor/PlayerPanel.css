@@ -24,12 +24,12 @@
   letter-spacing: 0.5px;
 }
 
-.team-title.attack {
-  color: #ff6b6b;
+.team-title.our {
+  color: #00BFFF; /* 하늘색 */
 }
 
-.team-title.defense {
-  color: #4ecdc4;
+.team-title.enemy {
+  color: #F44336; /* 빨간색 */
 }
 
 .players-list {
@@ -41,9 +41,9 @@
 .player-item {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 12px; /* 아바타와 정보 사이 간격 */
   padding: 8px 12px;
-  background: #19140f; /* 남색 톤 #0f1419에서 붉은 톤 #19140f로 변경 */
+  background: #19140f;
   border-radius: 6px;
   border-left: 3px solid transparent;
   cursor: pointer;
@@ -117,4 +117,8 @@
 
 .deselect-button:hover {
   background: #444;
+}
+
+.player-avatar {
+  flex-shrink: 0; /* 아바타 크기 고정 */
 }

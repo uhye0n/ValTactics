@@ -1,62 +1,19 @@
 .timeline-editor {
   background: #1a1a2e;
-  border-radius: 8px;
-  padding: 16px;
+  border-radius: 12px; /* 외부 테두리와 맞춤 */
+  padding: 0;
   color: white;
-  height: 300px;
+  height: 230px; /* 높이 더 증가 (180px → 230px) */
   display: flex;
   flex-direction: column;
-}
-
-.timeline-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #333;
-}
-
-.timeline-header h3 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.timeline-controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.zoom-button {
-  background: #333;
-  color: white;
-  border: 1px solid #555;
-  border-radius: 4px;
-  padding: 4px 8px;
-  font-size: 12px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.zoom-button:hover {
-  background: #444;
-}
-
-.scale-indicator {
-  font-size: 12px;
-  color: #aaa;
-  min-width: 40px;
-  text-align: center;
 }
 
 .timeline-container {
   flex: 1;
   position: relative;
   background: #0f1419;
-  border-radius: 6px;
-  margin-bottom: 12px;
+  border-radius: 0; /* 내부 border-radius 제거 */
+  margin: 0; /* 모든 margin 제거 */
   overflow: hidden;
 }
 
@@ -132,34 +89,19 @@
 
 .timeline-track {
   display: flex;
-  height: 40px;
+  height: 50px; /* 높이 증가 (40px → 50px) */
   border-bottom: 1px solid #222;
 }
 
 .track-header {
-  width: 120px;
+  width: 50px; /* 폭 줄임 (120px → 50px) */
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center; /* 중앙 정렬 */
+  padding: 6px;
   padding: 0 8px;
   background: #1a1a2e;
-  border-right: 1px solid #333;
-  flex-shrink: 0;
-}
-
-.player-indicator {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  border: 1px solid #333;
-}
-
-.player-name {
-  font-size: 12px;
-  font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  border-right: 1px solid #333;  flex-shrink: 0;
 }
 
 .track-content {
@@ -259,24 +201,6 @@
   bottom: 0;
   width: 1px;
   background: #222;
-}
-
-.timeline-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 12px;
-  color: #666;
-  padding-top: 8px;
-  border-top: 1px solid #333;
-}
-
-.duration-info {
-  font-family: 'Courier New', monospace;
-}
-
-.actions-count {
-  color: #aaa;
 }
 
 /* 스크롤바 스타일링 */

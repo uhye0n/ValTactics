@@ -14,11 +14,9 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
   onTimeChange,
   onActionUpdate,
   onActionDelete
-}) => {
-  const timelineRef = useRef<HTMLDivElement>(null);
+}) => {  const timelineRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragActionId, setDragActionId] = useState<string | null>(null);
-  const [scale, setScale] = useState(1);
     const duration = scenario.timeline?.duration || 30000; // 기본 30초
   const currentTime = 0; // 현재 시간은 props로 받거나 상태로 관리해야 함
 
@@ -84,28 +82,8 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
       default: return '❓';
     }
   };
-
   return (
     <div className="timeline-editor">
-      <div className="timeline-header">
-        <h3>타임라인</h3>
-        <div className="timeline-controls">
-          <button
-            className="zoom-button"
-            onClick={() => setScale(Math.max(0.5, scale - 0.25))}
-          >
-            🔍-
-          </button>
-          <span className="scale-indicator">{Math.round(scale * 100)}%</span>
-          <button
-            className="zoom-button"
-            onClick={() => setScale(Math.min(3, scale + 0.25))}
-          >
-            🔍+
-          </button>
-        </div>
-      </div>
-
       <div 
         className="timeline-container" 
         ref={timelineRef}
@@ -140,13 +118,40 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
         </div>
 
         <div className="timeline-tracks">          {scenario.teams?.map((team) => (
-            <div key={team.id} className="timeline-track">
-              <div className="track-header">
+            <div key={team.id} className="timeline-track">              <div className="track-header">
                 <div 
                   className="player-indicator"
-                  style={{ backgroundColor: team.teamType === 'our' ? '#4CAF50' : '#F44336' }}
-                ></div>
-                <span className="player-name">{team.agentName}</span>
+                  style={{ 
+                    backgroundColor: 'transparent',
+                    border: `2px solid ${team.teamType === 'our' ? '#00BFFF' : '#F44336'}`,
+                    padding: '2px',
+                    width: '28px',
+                    height: '28px',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <img 
+                    src={`/resources/images/agent/${team.agentName}.png`}
+                    alt={team.agentName}
+                    style={{
+                      width: '24px',
+                      height: '24px',
+                      borderRadius: '50%',
+                      objectFit: 'cover'
+                    }}
+                    onError={(e) => {
+                      // 이미지 로드 실패 시 텍스트로 대체
+                      e.currentTarget.style.display = 'none';
+                      const fallbackDiv = document.createElement('div');
+                      fallbackDiv.style.cssText = 'font-size: 10px; color: white; text-align: center; font-weight: bold;';
+                      fallbackDiv.textContent = team.agentName.substring(0, 2).toUpperCase();
+                      e.currentTarget.parentNode?.appendChild(fallbackDiv);
+                    }}
+                  />
+                </div>
               </div>
                 <div className="track-content">                {actionsByPlayer[team.id]?.map(event => {
                   const position = (event.timestamp / duration) * 100;
@@ -188,17 +193,8 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
             <div
               key={i}
               className="grid-line"
-              style={{ left: `${40 + (i * 5)}%` }}
-            ></div>
+              style={{ left: `${40 + (i * 5)}%` }}            ></div>
           ))}
-        </div>
-      </div>
-
-      <div className="timeline-info">
-        <div className="duration-info">
-          총 시간: {formatTime(duration)} | 현재: {formatTime(currentTime)}
-        </div>        <div className="actions-count">
-          총 액션: {scenario.timeline?.events?.length || 0}개
         </div>
       </div>
     </div>
