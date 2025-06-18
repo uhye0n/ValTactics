@@ -23,8 +23,8 @@
   align-items: center;
   gap: 15px;
   padding: 15px;
-  background: rgba(255, 71, 87, 0.1);
-  border: 1px solid rgba(255, 71, 87, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 8px;
 }
 
@@ -44,7 +44,7 @@
 .player-details h3 {
   margin: 0 0 5px 0;
   font-size: 16px;
-  color: #ff4757;
+  color: #ffffff;
 }
 
 .player-details p {
@@ -158,8 +158,8 @@
 /* 액션 지시사항 */
 .action-instructions {
   padding: 15px;
-  background: rgba(255, 71, 87, 0.1);
-  border: 1px solid rgba(255, 71, 87, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 8px;
   text-align: center;
   animation: pulse 2s infinite;
@@ -167,7 +167,7 @@
 
 .action-instructions p {
   margin: 0;
-  color: #ff4757;
+  color: #ffffff;
   font-size: 14px;
   font-weight: bold;
   text-transform: uppercase;
@@ -195,12 +195,12 @@
 }
 
 .action-categories::-webkit-scrollbar-thumb {
-  background: rgba(255, 71, 87, 0.5);
+  background: rgba(255, 255, 255, 0.5);
   border-radius: 2px;
 }
 
 .action-categories::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 71, 87, 0.8);
+  background: rgba(255, 255, 255, 0.8);
 }
 
 /* 반응형 */

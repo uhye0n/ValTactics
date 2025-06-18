@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useScenario } from '../../contexts/ScenarioContext';
 import type { Player, Position } from '../../types/scenario';
 import MapCanvas from './MapCanvas';
@@ -15,6 +15,12 @@ const ScenarioEditor: React.FC = () => {
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [rightPanelMode, setRightPanelMode] = useState<'players' | 'actions'>('players');
+  
+  // 맵 팬 기능을 위한 상태
+  const [mapOffset, setMapOffset] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [mapScale, setMapScale] = useState(1);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
 
   // 테스트용 더미 시나리오 데이터
   const dummyScenario = {
@@ -69,9 +75,25 @@ const ScenarioEditor: React.FC = () => {
       gameMode: 'competitive' as const
     }
   };
-
   // currentScenario가 없으면 더미 데이터 사용
   const scenario = currentScenario || dummyScenario;
+  // 맵 이미지 경로 설정
+  const getMapImagePath = (mapId: string) => {
+    const mapImageMap: { [key: string]: string } = {
+      'abyss': '/resources/images/map/Abyss_map.webp',
+      'ascent': '/resources/images/map/Ascent_map.webp',
+      'bind': '/resources/images/map/Bind_map.webp',
+      'breeze': '/resources/images/map/Breeze_map.webp',
+      'fracture': '/resources/images/map/Fracture_map.webp',
+      'haven': '/resources/images/map/Haven_map.webp',
+      'icebox': '/resources/images/map/Icebox_map.webp',
+      'lotus': '/resources/images/map/Lotus_map.webp',
+      'pearl': '/resources/images/map/Pearl_map.webp',
+      'split': '/resources/images/map/Split_map.webp',
+      'sunset': '/resources/images/map/Sunset_map.webp'
+    };
+    return mapImageMap[mapId.toLowerCase()] || '/resources/images/map/Ascent_map.webp';
+  };
 
   const handlePlayerSelect = (playerId: string | null) => {
     setSelectedPlayerId(playerId);
@@ -79,9 +101,43 @@ const ScenarioEditor: React.FC = () => {
       setRightPanelMode('actions'); // 플레이어 선택 후 액션 패널로 전환
     }
   };
-
   const handleActionSelect = (actionType: string) => {
     setSelectedAction(actionType);
+  };
+  // 맵 드래그 이벤트 핸들러들
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.button === 1) { // 마우스 가운데 버튼 (휠 클릭)
+      e.preventDefault();
+      setIsDragging(true);
+      
+      // 현재 마우스 위치와 맵 오프셋의 차이를 계산
+      const startX = e.clientX - mapOffset.x;
+      const startY = e.clientY - mapOffset.y;
+      
+      const handleMouseMove = (moveEvent: MouseEvent) => {
+        if (mapContainerRef.current) {
+          const newX = moveEvent.clientX - startX;
+          const newY = moveEvent.clientY - startY;
+          setMapOffset({ x: newX, y: newY });
+        }
+      };
+      
+      const handleMouseUp = () => {
+        setIsDragging(false);
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+      
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+  };
+
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    const scaleChange = e.deltaY > 0 ? 0.9 : 1.1;
+    const newScale = Math.min(Math.max(mapScale * scaleChange, 0.5), 3);
+    setMapScale(newScale);
   };
   const handleMapClick = (position: Position) => {
     if (selectedPlayerId && selectedAction && scenario) {
@@ -98,43 +154,118 @@ const ScenarioEditor: React.FC = () => {
     : null;
 
   // 로딩 상태는 제거 (더미 데이터가 있으므로 항상 시나리오가 존재)
-  
-  return (
+    return (
     <div className="scenario-editor">
       <div className="scenario-editor-background"></div>
       
       {/* Header는 App.tsx에서 렌더링되므로 여기서는 제거 */}
-      
-      <div className="scenario-editor-content">
-        {/* 상단 헤더 */}
-        <div className="scenario-editor-header">
-          <h1 className="editor-title">시나리오 에디터</h1><div className="scenario-info">
-            <div className="info-item">
-              <span className="info-label">맵</span>
-              <span className="info-value">{scenario.title}</span>
-            </div>
-            <div className="info-item">
-              <span className="info-label">플레이어</span>
-              <span className="info-value">{scenario.players.length}</span>
-            </div>
-          </div>
-        </div>
-
+        <div className="scenario-editor-content">
         {/* 메인 콘텐츠 영역 */}
         <div className="editor-main-container">
           {/* 왼쪽: 맵 영역 */}
           <div className="editor-map-section">
-            <div className="map-container">
-              <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '18px' }}>
-                맵 캔버스 (개발 중)
+            <div className="map-container" ref={mapContainerRef}>
+              <div 
+                className="map-canvas"
+                onMouseDown={handleMouseDown}
+                onWheel={handleWheel}
+                style={{
+                  cursor: isDragging ? 'grabbing' : 'grab',
+                  userSelect: 'none'
+                }}
+              >
+                <div 
+                  className="map-content"
+                  style={{
+                    transform: `translate(${mapOffset.x}px, ${mapOffset.y}px) scale(${mapScale})`,
+                    transformOrigin: 'center center',
+                    transition: isDragging ? 'none' : 'transform 0.1s ease-out'
+                  }}
+                >
+                  <img 
+                    src={getMapImagePath(scenario.mapId)} 
+                    alt={`${scenario.title} Map`}
+                    className="map-image"
+                    draggable={false}
+                  />
+                  <div 
+                    className="map-overlay" 
+                    onClick={(e) => {
+                      if (selectedPlayerId && selectedAction) {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const x = ((e.clientX - rect.left) / rect.width) * 100;
+                        const y = ((e.clientY - rect.top) / rect.height) * 100;
+                        handleMapClick({ x, y });
+                      }
+                    }}
+                  >
+                    {/* 플레이어 마커들이 여기에 렌더링됩니다 */}
+                    {scenario.players.map((player, index) => (
+                      <div
+                        key={player.id}
+                        className={`player-marker ${selectedPlayerId === player.id ? 'selected' : ''}`}
+                        style={{
+                          backgroundColor: player.color,
+                          position: 'absolute',
+                          left: `${20 + (index * 15)}%`,
+                          top: `${30 + (index * 10)}%`,
+                          transform: 'translate(-50%, -50%)'
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePlayerSelect(player.id);
+                        }}
+                      >
+                        {player.agent.charAt(0)}
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
-            
-            {/* 하단 타임라인 */}
+              {/* 하단 타임라인 */}
             <div className="timeline-section">
-              <div style={{ color: '#fff', padding: '10px' }}>타임라인 에디터 (개발 중)</div>
-              
-              <div style={{ color: '#fff', padding: '10px' }}>재생 컨트롤 (개발 중)</div>
+              <div className="timeline-header">                <h3 style={{ color: '#ffffff', margin: 0, fontSize: '18px', fontFamily: 'Fascinate, sans-serif' }}>
+                  타임라인 에디터
+                </h3>
+                <div className="timeline-controls" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>                  <button style={{ 
+                    background: 'rgba(255, 255, 255, 0.2)', 
+                    border: '1px solid rgba(255, 255, 255, 0.5)', 
+                    color: '#fff', 
+                    padding: '8px 16px', 
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '12px'
+                  }}>
+                    재생
+                  </button>
+                  <button style={{ 
+                    background: 'rgba(255, 255, 255, 0.2)', 
+                    border: '1px solid rgba(255, 255, 255, 0.5)', 
+                    color: '#fff', 
+                    padding: '8px 16px', 
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '12px'
+                  }}>
+                    정지
+                  </button>
+                  <span style={{ color: '#fff', fontSize: '14px' }}>00:00 / 00:30</span>
+                </div>
+              </div>
+              <div className="timeline-content" style={{ 
+                flex: 1, 
+                background: 'rgba(0, 0, 0, 0.3)', 
+                borderRadius: '8px', 
+                padding: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'rgba(255, 255, 255, 0.6)',
+                fontSize: '14px'
+              }}>
+                타임라인 트랙이 여기에 표시됩니다
+              </div>
             </div>
           </div>
 
@@ -156,7 +287,9 @@ const ScenarioEditor: React.FC = () => {
                   액션 선택
                 </button>
               </div>
-            </div>            <div className="panel-content">
+            </div>
+
+            <div className="panel-content">
               {rightPanelMode === 'players' ? (
                 <PlayerPanel
                   players={scenario.players}
