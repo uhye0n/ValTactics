@@ -17,13 +17,14 @@ export function Header() {
   const handleBackClick = () => {
     navigate('/');
   };
-
   const isNewScenarioPage = location.pathname === '/new-scenario';
+  const isScenarioEditorPage = location.pathname === '/scenario-editor';
+  const showBackNavigation = isNewScenarioPage || isScenarioEditorPage;
 
   return (
     <header className="header">
       <div className="header__container">
-        {isNewScenarioPage ? (
+        {showBackNavigation ? (
           <div className="header__back">
             <div className="back-nav-container">
               <button className="back-button" onClick={handleBackClick}>
@@ -42,11 +43,12 @@ export function Header() {
                 </div>
                 <span className="back-text">뒤로가기</span>
               </button>
-              
-              <div className="breadcrumb">
+                <div className="breadcrumb">
                 <div className="breadcrumb-arrow" />
                 <div className="breadcrumb-arrow" />
-                <span className="breadcrumb-text">메인화면</span>
+                <span className="breadcrumb-text">
+                  {isNewScenarioPage ? '메인화면' : isScenarioEditorPage ? '시나리오 생성' : '메인화면'}
+                </span>
               </div>
             </div>
           </div>

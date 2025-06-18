@@ -1,0 +1,408 @@
+.right-panel {
+  width: 300px;
+  background: linear-gradient(135deg, #0f1419 0%, #1a1a2e 100%);
+  border: 1px solid #2d3748;
+  border-radius: 12px;
+  padding: 20px;
+  color: white;
+  height: 100%;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.right-panel h3,
+.right-panel h4 {
+  margin: 0 0 16px 0;
+  font-weight: 600;
+  color: #e2e8f0;
+  border-bottom: 2px solid #2d3748;
+  padding-bottom: 8px;
+}
+
+.right-panel h3 {
+  font-size: 18px;
+  color: #00d2d3;
+}
+
+.right-panel h4 {
+  font-size: 14px;
+  margin-top: 24px;
+}
+
+/* 도구 선택 */
+.tool-section {
+  margin-bottom: 32px;
+}
+
+.tool-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.tool-btn {
+  background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+  border: 2px solid #4a5568;
+  border-radius: 8px;
+  padding: 16px 12px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tool-btn:hover {
+  background: linear-gradient(135deg, #4a5568 0%, #68d391 100%);
+  border-color: #68d391;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(104, 211, 145, 0.3);
+}
+
+.tool-btn.active {
+  background: linear-gradient(135deg, #00d2d3 0%, #0891b2 100%);
+  border-color: #00d2d3;
+  box-shadow: 0 4px 16px rgba(0, 210, 211, 0.4);
+}
+
+.tool-icon {
+  font-size: 24px;
+}
+
+/* 플레이어 정보 */
+.player-section {
+  margin-bottom: 32px;
+}
+
+.player-info-card {
+  background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+  border: 1px solid #4a5568;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.player-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.player-initial {
+  text-transform: uppercase;
+}
+
+.player-details {
+  flex: 1;
+}
+
+.player-agent {
+  font-size: 18px;
+  font-weight: 600;
+  color: #e2e8f0;
+  margin-bottom: 4px;
+}
+
+.player-name {
+  font-size: 14px;
+  color: #a0aec0;
+  margin-bottom: 8px;
+}
+
+.player-team {
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.player-team.attack {
+  background: rgba(255, 107, 107, 0.2);
+  color: #ff6b6b;
+  border: 1px solid #ff6b6b;
+}
+
+.player-team.defense {
+  background: rgba(78, 205, 196, 0.2);
+  color: #4ecdc4;
+  border: 1px solid #4ecdc4;
+}
+
+/* 스킬 선택 */
+.skills-section {
+  margin-bottom: 24px;
+}
+
+.skills-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skill-btn {
+  background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+  border: 1px solid #4a5568;
+  border-radius: 8px;
+  padding: 12px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+}
+
+.skill-btn:hover {
+  background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+  border-color: #68d391;
+  transform: translateX(4px);
+}
+
+.skill-btn.active {
+  background: linear-gradient(135deg, #ffd700 0%, #ff9500 100%);
+  border-color: #ffd700;
+  color: #1a202c;
+  box-shadow: 0 4px 16px rgba(255, 215, 0, 0.3);
+}
+
+.skill-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  position: relative;
+}
+
+.skill-icon img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.skill-fallback {
+  font-size: 20px;
+}
+
+.skill-info {
+  flex: 1;
+}
+
+.skill-name {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.skill-type {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+.skill-type.ultimate {
+  background: #ff6b6b;
+  color: white;
+}
+
+.skill-type.signature {
+  background: #ffd700;
+  color: #1a202c;
+}
+
+.skill-type.basic {
+  background: #68d391;
+  color: #1a202c;
+}
+
+/* 빠른 액션 */
+.quick-actions-section {
+  margin-bottom: 24px;
+}
+
+.quick-actions-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.quick-action-btn {
+  background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+  border: 1px solid #4a5568;
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.quick-action-btn:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.quick-action-btn.plant {
+  border-color: #ff9f43;
+}
+
+.quick-action-btn.plant:hover {
+  background: linear-gradient(135deg, #ff9f43 0%, #ff6b35 100%);
+  border-color: #ff9f43;
+}
+
+.quick-action-btn.defuse {
+  border-color: #0abde3;
+}
+
+.quick-action-btn.defuse:hover {
+  background: linear-gradient(135deg, #0abde3 0%, #006ba6 100%);
+  border-color: #0abde3;
+}
+
+.quick-action-btn.death {
+  border-color: #ff3838;
+}
+
+.quick-action-btn.death:hover {
+  background: linear-gradient(135deg, #ff3838 0%, #c53030 100%);
+  border-color: #ff3838;
+}
+
+.action-icon {
+  font-size: 20px;
+}
+
+/* 플레이어 선택되지 않은 상태 */
+.no-player-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  margin-bottom: 32px;
+}
+
+.no-player-message {
+  text-align: center;
+  color: #718096;
+}
+
+.no-player-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.no-player-message h4 {
+  font-size: 16px;
+  margin-bottom: 8px;
+  color: #a0aec0;
+  border: none;
+  padding: 0;
+}
+
+.no-player-message p {
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* 시간 정보 */
+.time-section {
+  background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+  border: 1px solid #4a5568;
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+}
+
+.time-display {
+  font-size: 24px;
+  font-weight: 600;
+  color: #00d2d3;
+  font-family: 'Courier New', monospace;
+  text-shadow: 0 2px 4px rgba(0, 210, 211, 0.3);
+}
+
+/* 스크롤바 스타일링 */
+.right-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.right-panel::-webkit-scrollbar-track {
+  background: #1a202c;
+  border-radius: 3px;
+}
+
+.right-panel::-webkit-scrollbar-thumb {
+  background: #4a5568;
+  border-radius: 3px;
+}
+
+.right-panel::-webkit-scrollbar-thumb:hover {
+  background: #68d391;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .right-panel {
+    width: 100%;
+    height: auto;
+    margin-bottom: 16px;
+  }
+  
+  .tool-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .skills-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  
+  .skill-btn {
+    flex: 1;
+    min-width: 120px;
+  }
+  
+  .quick-actions-grid {
+    flex-direction: row;
+    gap: 8px;
+  }
+  
+  .quick-action-btn {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+}
