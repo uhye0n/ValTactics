@@ -698,3 +698,9 @@ body.map-active {
     padding: 12px 15px;
   }
 }
+
+.map-content,
+.map-overlay,
+.movement-svg {
+  transform-origin: center center !important;
+}

@@ -216,6 +216,16 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
                         backgroundColor: getActionColor(event.eventType || 'unknown'),
                       }}
                       onMouseDown={(e) => handleActionDragStart(event.id, e)}
+                      onClick={(e) => {
+                        // 좌클릭: 해당 시간으로 이동
+                        if (e.button === 0) {
+                          onTimeChange(event.timestamp);
+                        }
+                      }}
+                      onContextMenu={(e) => {
+                        e.preventDefault();
+                        onActionDelete(event.id);
+                      }}
                       title={`${event.eventType} at ${formatTime(event.timestamp)}`}
                     >
                       <span className="action-icon">{getActionIcon(event.eventType || 'unknown')}</span>
@@ -225,15 +235,7 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
                         {isSkill && durationMs > 0 && (
                           <div>지속: {Math.round(durationMs/1000)}초</div>
                         )}
-                        <button
-                          className="delete-action"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onActionDelete(event.id);
-                          }}
-                        >
-                          ×
-                        </button>
+                        {/* 삭제 버튼은 숨김 처리 (우클릭으로만 삭제) */}
                       </div>
                     </div>
                   );

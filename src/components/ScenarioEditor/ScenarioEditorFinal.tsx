@@ -10,6 +10,14 @@ import PlaybackControls from './PlaybackControls';
 import apiService from '../../services/api';
 import './ScenarioEditorComplete.css';
 
+// % 좌표를 px로 변환하는 함수 (컴포넌트 상단에 선언)
+function percentToPx(x: number, y: number, overlayW: number, overlayH: number) {
+  return {
+    x: (x / 100) * overlayW,
+    y: (y / 100) * overlayH
+  };
+}
+
 // 요원 이름을 이미지 파일명으로 변환하는 함수
 const getAgentImageName = (agentName: string): string => {
   if (agentName === 'KAY/O') {
@@ -122,29 +130,24 @@ const ScenarioEditor: React.FC = () => {
     return () => clearInterval(interval);
   }, [isPlaying]);
 
-  // 플레이어 위치를 시간에 따라 업데이트
+  // 플레이어 위치를 시간에 따라 업데이트 (경로 보간, 배율/오프셋 반영)
   useEffect(() => {
     const updatedPositions: { [playerId: string]: { x: number, y: number } } = {};
-    
+
     Object.entries(movementPaths).forEach(([playerId, path]) => {
-      if (path.length === 0) return;
-      
-      // 현재 시간에 해당하는 위치 계산
-      let targetPosition = null;
-      for (let i = 0; i < path.length; i++) {
-        if (path[i].time <= currentTime) {
-          targetPosition = path[i];
-        } else {
-          break;
-        }
-      }
-      
-      if (targetPosition) {
-        updatedPositions[playerId] = { x: targetPosition.x, y: targetPosition.y };
-      }
+      if (path.length < 2) return;
+      // 현재 시간에 해당하는 구간 찾기
+      let i = 0;
+      while (i < path.length - 1 && currentTime >= path[i + 1].time) i++;
+      const start = path[i];
+      const end = path[i + 1];
+      if (!start || !end) return;
+      const t = Math.max(0, Math.min(1, (currentTime - start.time) / (end.time - start.time)));
+      // 보간 위치
+      const x = start.x + (end.x - start.x) * t;
+      const y = start.y + (end.y - start.y) * t;
+      updatedPositions[playerId] = { x, y };
     });
-    
-    // 새로운 위치가 있는 경우에만 업데이트
     if (Object.keys(updatedPositions).length > 0) {
       setPlayerPositions(prev => ({ ...prev, ...updatedPositions }));
     }
@@ -354,16 +357,31 @@ const ScenarioEditor: React.FC = () => {
     const clampedX = Math.max(0, Math.min(100, percentX));
     const clampedY = Math.max(0, Math.min(100, percentY));
 
-    // 기존 addAction 대신 recordPlayerAction 사용
     if (actionMode === 'move' || actionMode === 'run') {
+      // 기존 위치
+      const prevPath = movementPaths[selectedPlayerId] || [];
+      const last = prevPath.length > 0 ? prevPath[prevPath.length - 1] : playerPositions[selectedPlayerId] || { x: 50, y: 50 };
+      const speed = actionMode === 'run' ? 80 : 40; // 1초에 8000%/4000% 이동(1000배 빠름)
+      const dx = clampedX - last.x;
+      const dy = clampedY - last.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const duration = dist / speed * 1000; // ms
+      const startTime = prevPath.length > 0 ? prevPath[prevPath.length - 1].time : currentTime;
+      const endTime = startTime + duration;
+
+      setMovementPaths(prev => ({
+        ...prev,
+        [selectedPlayerId]: [
+          ...prevPath,
+          { x: last.x, y: last.y, time: startTime },
+          { x: clampedX, y: clampedY, time: endTime }
+        ]
+      }));
+
       recordPlayerAction(selectedPlayerId, 'move', { x: clampedX, y: clampedY }, {
         moveType: actionMode,
-        duration: actionMode === 'run' ? 2000 : 4000
+        duration: duration
       });
-      setPlayerPositions(prev => ({
-        ...prev,
-        [selectedPlayerId]: { x: clampedX, y: clampedY }
-      }));
     } else if (actionMode === 'skill') {
       recordPlayerAction(selectedPlayerId, 'skill', { x: clampedX, y: clampedY }, {
         skillType: selectedAction,
@@ -514,7 +532,12 @@ const ScenarioEditor: React.FC = () => {
                 <div 
                   className="map-content"
                   style={{
-                    transform: `translate(${mapOffset.x}px, ${mapOffset.y}px) scale(${mapScale})`,
+                    position: 'absolute',
+                    left: '50%',
+                    top: '50%',
+                    width: '200%',
+                    height: '200%',
+                    transform: `translate(-50%, -50%) scale(${mapScale})`,
                     transformOrigin: 'center center',
                     transition: isDragging ? 'none' : 'transform 0.1s ease-out'
                   }}
@@ -523,50 +546,67 @@ const ScenarioEditor: React.FC = () => {
                     alt={`${currentScenario.title} Map`}
                     className="map-image"
                     draggable={false}
+                    style={{ width: '100%', height: '100%' }}
                   />                  <div 
-                    className="map-overlay" 
+                    className="map-overlay"
                     onClick={handleMapClick}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      position: 'absolute',
+                      left: '50%',
+                      top: '50%',
+                      transform: 'translate(-50%, -50%)',
+                      pointerEvents: 'auto'
+                    }}
                   >
-                    {/* 이동 경로 시각화 */}
-                    {Object.entries(movementPaths).map(([playerId, path]) => {
-                      if (path.length < 2) return null;
-                      
-                      const player = players.find(p => p.id === playerId);
-                      if (!player) return null;
-                      
-                      const pathElements = [];
-                      for (let i = 0; i < path.length - 1; i++) {
-                        const startPoint = path[i];
-                        const endPoint = path[i + 1];
-                        
-                        const deltaX = endPoint.x - startPoint.x;
-                        const deltaY = endPoint.y - startPoint.y;
-                        const length = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-                        const angle = Math.atan2(deltaY, deltaX) * 180 / Math.PI;
-                        
-                        pathElements.push(
-                          <div
-                            key={`${playerId}-path-${i}`}
-                            className="movement-path"
-                            style={{
-                              position: 'absolute',
-                              left: `${startPoint.x}%`,
-                              top: `${startPoint.y}%`,
-                              width: `${length}%`,
-                              height: '2px',
-                              backgroundColor: player.team === 'our' ? '#00BFFF' : '#F44336',
-                              transformOrigin: '0 50%',
-                              transform: `rotate(${angle}deg)`,
-                              opacity: 0.8,
-                              pointerEvents: 'none',
-                              zIndex: 5
-                            }}
-                          />
+                    {/* 이동 경로 시각화 (SVG) */}
+                    <svg
+                      className="movement-svg"
+                      width="100%"
+                      height="100%"
+                      style={{
+                        position: 'absolute',
+                        left: 0,
+                        top: 0,
+                        width: '100%',
+                        height: '100%',
+                        pointerEvents: 'none',
+                        zIndex: 5
+                      }}
+                    >
+                      {Object.entries(movementPaths).map(([playerId, path]) => {
+                        if (!playerId || !Array.isArray(path) || path.length < 2) return null;
+                        const safePath = path.map(pt => ({
+                          x: Math.max(0, Math.min(100, pt.x)),
+                          y: Math.max(0, Math.min(100, pt.y)),
+                          time: pt.time
+                        }));
+                        const player = players.find(p => p.id === playerId);
+                        if (!player) return null;
+                        // map-overlay의 실제 px 크기를 기준으로 변환
+                        const mapOverlay = mapContainerRef.current?.querySelector('.map-overlay') as HTMLElement;
+                        const overlayRect = mapOverlay?.getBoundingClientRect();
+                        const overlayW = overlayRect?.width || 1;
+                        const overlayH = overlayRect?.height || 1;
+                        const points = safePath.map(pt => {
+                          const { x, y } = percentToPx(pt.x, pt.y, overlayW, overlayH);
+                          return `${x},${y}`;
+                        }).join(' ');
+                        return (
+                          <polyline
+            key={`polyline-${playerId}`}
+            points={points}
+            fill="none"
+            stroke={player.team === 'our' ? '#00BFFF' : '#F44336'}
+            strokeWidth={3}
+            opacity={0.8}
+            style={{ pointerEvents: 'none' }}
+          />
                         );
-                      }
-                      return pathElements;
-                    })}
-                    
+                      })}
+                    </svg>
+
                     {/* 스킬 효과 시각화 */}
                     {skillEffects.map((skill) => {
                       const player = players.find(p => p.id === skill.playerId);

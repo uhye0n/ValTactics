@@ -15,6 +15,10 @@
   font-weight: 300;
 }
 
+.timeline-editor, .timeline-container, .action-marker, .track-content {
+  user-select: none;
+}
+
 .timeline-container {
   flex: 1;
   position: relative;
