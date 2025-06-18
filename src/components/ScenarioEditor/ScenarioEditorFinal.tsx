@@ -1,22 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useScenario } from '../../contexts/ScenarioContext';
-import type { Player, Position } from '../../types/scenario';
-import MapCanvas from './MapCanvas';
 import TimelineEditor from './TimelineEditor';
 import PlayerPanel from './PlayerPanel';
 import ActionSelectionPanel from './ActionSelectionPanel';
-import PlaybackControls from './PlaybackControls';
 import apiService from '../../services/api';
 import './ScenarioEditorComplete.css';
-
-// % 좌표를 px로 변환하는 함수 (컴포넌트 상단에 선언)
-function percentToPx(x: number, y: number, overlayW: number, overlayH: number) {
-  return {
-    x: (x / 100) * overlayW,
-    y: (y / 100) * overlayH
-  };
-}
 
 // 요원 이름을 이미지 파일명으로 변환하는 함수
 const getAgentImageName = (agentName: string): string => {
@@ -29,7 +18,8 @@ const getAgentImageName = (agentName: string): string => {
 const ScenarioEditor: React.FC = () => {
   const { scenarioId } = useParams<{ scenarioId: string }>();
   const navigate = useNavigate();
-  const { currentScenario, loadScenario, isLoading } = useScenario();  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
+  const { currentScenario, loadScenario, isLoading } = useScenario();
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
   const [selectedAction, setSelectedAction] = useState<string | null>(null);
   const [rightPanelMode, setRightPanelMode] = useState<'players' | 'actions'>('players');
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -39,13 +29,21 @@ const ScenarioEditor: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [actionMode, setActionMode] = useState<'select' | 'move' | 'run' | 'skill'>('select');
   
-  // 맵 팬 기능을 위한 상태
+  // 맵 팬 기능을 위한 상태 (드래그 관련 단일 선언)
   const [mapOffset, setMapOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState<{x: number, y: number} | null>(null);
   const [dragOrigin, setDragOrigin] = useState<{x: number, y: number} | null>(null);
-  const [mapScale, setMapScale] = useState(1.2);
+  const [mapScale, setMapScale] = useState(1.2); // 확대/축소 상태 복구
   const mapContainerRef = useRef<HTMLDivElement>(null);
+
+  // 맵 확대/축소 핸들러 (상단에 위치)
+  const handleMapWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    let nextScale = mapScale - e.deltaY * 0.001;
+    nextScale = Math.max(0.5, Math.min(3, nextScale));
+    setMapScale(nextScale);
+  };
 
   // 플레이어 위치 상태 관리
   const [playerPositions, setPlayerPositions] = useState<{ [playerId: string]: { x: number, y: number } }>({});
@@ -53,13 +51,13 @@ const ScenarioEditor: React.FC = () => {
   // 이동 경로 및 스킬 효과
   const [movementPaths, setMovementPaths] = useState<{ [playerId: string]: Array<{x: number, y: number, time: number}> }>({});
   const [skillEffects, setSkillEffects] = useState<Array<{id: string, playerId: string, x: number, y: number, startTime: number, duration: number}>>([]);
+
   // 시나리오 로드
   useEffect(() => {
     if (!scenarioId) {
       setLoadError('시나리오 ID가 필요합니다.');
       return;
     }
-
     const loadScenarioData = async () => {
       try {
         setLoadError(null);
@@ -69,7 +67,6 @@ const ScenarioEditor: React.FC = () => {
         setLoadError(error.message || '시나리오를 불러오는데 실패했습니다.');
       }
     };
-
     loadScenarioData();
   }, [scenarioId, loadScenario]);
 
@@ -80,20 +77,19 @@ const ScenarioEditor: React.FC = () => {
         currentTime < skill.startTime + skill.duration
       ));
     };
-
     const interval = setInterval(cleanupSkills, 1000); // 1초마다 체크
     return () => clearInterval(interval);
-  }, [currentTime]);  // 플레이어 위치 초기화
+  }, [currentTime]);
+
+  // 플레이어 위치 초기화
   useEffect(() => {
     if (currentScenario && currentScenario.teams) {
       const initialPositions: { [playerId: string]: { x: number, y: number } } = {};
       const teams = currentScenario.teams;
-      
       teams.forEach((team) => {
         const isOurTeam = team.teamType === 'our';
         const teamPlayers = teams.filter(t => t.teamType === team.teamType);
         const teamIndex = teamPlayers.indexOf(team);
-        
         if (isOurTeam) {
           // 아군: 상단 중앙에 가로로 배치 (y=10, x=20~80 사이에 5명)
           const baseX = 30 + (teamIndex * 10); // 30, 40, 50, 60, 70
@@ -106,7 +102,6 @@ const ScenarioEditor: React.FC = () => {
           initialPositions[team.id] = { x: baseX, y: baseY };
         }
       });
-      
       setPlayerPositions(initialPositions);
     }
   }, [currentScenario]);
@@ -114,38 +109,30 @@ const ScenarioEditor: React.FC = () => {
   // 애니메이션 및 시뮬레이션 관리
   useEffect(() => {
     if (!isPlaying) return;
-
     const interval = setInterval(() => {
       setCurrentTime(prev => {
         const newTime = prev + 100; // 100ms씩 증가
-        
-        // 타임라인 끝에 도달하면 정지
         if (newTime >= 100000) { // 100초 = 100000ms
           setIsPlaying(false);
           return 100000;
         }
-        
         return newTime;
       });
     }, 100);
-
     return () => clearInterval(interval);
   }, [isPlaying]);
 
   // 플레이어 위치를 시간에 따라 업데이트 (경로 보간, 배율/오프셋 반영)
   useEffect(() => {
     const updatedPositions: { [playerId: string]: { x: number, y: number } } = {};
-
     Object.entries(movementPaths).forEach(([playerId, path]) => {
       if (path.length < 2) return;
-      // 현재 시간에 해당하는 구간 찾기
       let i = 0;
       while (i < path.length - 1 && currentTime >= path[i + 1].time) i++;
       const start = path[i];
       const end = path[i + 1];
       if (!start || !end) return;
       const t = Math.max(0, Math.min(1, (currentTime - start.time) / (end.time - start.time)));
-      // 보간 위치
       const x = start.x + (end.x - start.x) * t;
       const y = start.y + (end.y - start.y) * t;
       updatedPositions[playerId] = { x, y };
@@ -247,10 +234,8 @@ const ScenarioEditor: React.FC = () => {
   // 플레이어 액션 기록 함수
   const recordPlayerAction = async (playerId: string, actionType: 'move' | 'skill' | 'shoot' | 'plant' | 'defuse' | 'death' | 'revive', position: { x: number; y: number }, data?: any) => {
     if (!currentScenario?.id) return;
-    
     try {
       const eventId = `event_${Date.now()}_${playerId}`;
-      
       await apiService.addTimelineEvent(currentScenario.id, {
         id: eventId,
         playerId,
@@ -259,19 +244,15 @@ const ScenarioEditor: React.FC = () => {
         position,
         metadata: data
       });
-      
       console.log(`Recorded ${actionType} action for player ${playerId} at ${currentTime}ms`);
-      
       // 시나리오 다시 로드하여 타임라인에 표시
       await loadScenario(currentScenario.id);
     } catch (error) {
       console.error('Failed to record player action:', error);
     }
-  };// 맵 드래그 상태 관리 (우클릭 전용)
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState<{x: number, y: number} | null>(null);
-  const [dragOrigin, setDragOrigin] = useState<{x: number, y: number} | null>(null);
+  };
 
+  // --- 드래그 핸들러만 남기고 상태 중복 선언 제거 ---
   const handleMapMouseDown = (e: React.MouseEvent) => {
     if (e.button === 2) { // 우클릭
       e.preventDefault();
@@ -297,29 +278,7 @@ const ScenarioEditor: React.FC = () => {
       window.removeEventListener('mouseup', handleMapMouseUp as any);
     }
   };
-  const handleWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
-    const scaleChange = e.deltaY > 0 ? 0.9 : 1.1;
-    const newScale = Math.min(Math.max(mapScale * scaleChange, 0.5), 3);
-    setMapScale(newScale);
-    
-    // 스케일 변경 시 오프셋 범위 재조정
-    if (mapContainerRef.current) {
-      const containerRect = mapContainerRef.current.getBoundingClientRect();
-      const imageScale = 2.0 * newScale;
-      const scaledImageWidth = containerRect.width * imageScale;
-      const scaledImageHeight = containerRect.height * imageScale;
-      
-      const maxOffsetX = Math.max(0, (scaledImageWidth - containerRect.width) / 2);
-      const maxOffsetY = Math.max(0, (scaledImageHeight - containerRect.height) / 2);
-      
-      // 현재 오프셋이 새로운 범위를 벗어나면 조정
-      setMapOffset(prev => ({
-        x: Math.min(Math.max(prev.x, -maxOffsetX), maxOffsetX),
-        y: Math.min(Math.max(prev.y, -maxOffsetY), maxOffsetY)
-      }));
-    }
-  };  const handleMapClick = (e: React.MouseEvent) => {
+  const handleMapClick = (e: React.MouseEvent) => {
     console.log('맵 클릭 발생', { selectedPlayerId, actionMode, draggedPlayer });
     if (!selectedPlayerId || actionMode === 'select' || draggedPlayer) {
       console.log('맵 클릭 무시됨: 조건 불충족', { selectedPlayerId, actionMode, draggedPlayer });
@@ -395,7 +354,7 @@ const ScenarioEditor: React.FC = () => {
   };
 
   // teams 데이터를 Player 배열로 변환하는 함수
-  const convertTeamsToPlayers = (teams: any[] = []): Player[] => {
+  const convertTeamsToPlayers = (teams: any[] = []): any[] => {
     return teams.map((team) => ({
       id: team.id,
       name: team.agentName, // 숫자 제거
@@ -429,7 +388,6 @@ const ScenarioEditor: React.FC = () => {
     if (!mapOverlay) return;    const handleMouseMove = (moveEvent: MouseEvent) => {
       const overlayRect = mapOverlay.getBoundingClientRect();
       
-      // 마우스 위치를 맵 오버레이 기준 백분율로 변환
       // 마우스 위치를 맵 오버레이 기준 백분율로 변환
       const mouseX = moveEvent.clientX - overlayRect.left;
       const mouseY = moveEvent.clientY - overlayRect.top;
@@ -507,9 +465,9 @@ const ScenarioEditor: React.FC = () => {
           <div className="editor-map-section">
             <div className="map-container" ref={mapContainerRef}>              <div 
                 className={`map-canvas ${isDragging ? 'dragging' : ''}`}
-                onMouseDown={handleMouseDown}
-                onWheel={handleWheel}
-                onContextMenu={(e) => e.preventDefault()} // 우클릭 메뉴 방지
+                onMouseDown={handleMapMouseDown}
+                onContextMenu={e => e.preventDefault()}
+                onWheel={handleMapWheel} // 확대/축소 핸들러 추가
                 style={{
                   cursor: isDragging ? 'grabbing' : 'grab',
                   userSelect: 'none'
