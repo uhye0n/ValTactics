@@ -267,35 +267,34 @@ const ScenarioEditor: React.FC = () => {
     } catch (error) {
       console.error('Failed to record player action:', error);
     }
-  };// 맵 드래그 상태 관리
-  const handleMouseDown = (e: React.MouseEvent) => {
-    // 가운데 버튼: e.button === 1 또는 e.buttons & 4
-    if (e.button === 1 || (e.buttons & 4)) {
+  };// 맵 드래그 상태 관리 (우클릭 전용)
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState<{x: number, y: number} | null>(null);
+  const [dragOrigin, setDragOrigin] = useState<{x: number, y: number} | null>(null);
+
+  const handleMapMouseDown = (e: React.MouseEvent) => {
+    if (e.button === 2) { // 우클릭
       e.preventDefault();
       setIsDragging(true);
       setDragStart({ x: e.clientX, y: e.clientY });
       setDragOrigin({ ...mapOffset });
-      window.addEventListener('mousemove', handleMouseMove as any);
-      window.addEventListener('mouseup', handleMouseUp as any);
+      window.addEventListener('mousemove', handleMapMouseMove as any);
+      window.addEventListener('mouseup', handleMapMouseUp as any);
     }
   };
-  const handleMouseMove = (e: MouseEvent) => {
+  const handleMapMouseMove = (e: MouseEvent) => {
     if (!isDragging || !dragStart || !dragOrigin) return;
     const dx = e.clientX - dragStart.x;
     const dy = e.clientY - dragStart.y;
-    setMapOffset(prev => {
-      const next = { x: dragOrigin.x + dx, y: dragOrigin.y + dy };
-      console.log('mapOffset', next);
-      return next;
-    });
+    setMapOffset({ x: dragOrigin.x + dx, y: dragOrigin.y + dy });
   };
-  const handleMouseUp = (e: MouseEvent) => {
-    if (e.button === 1) {
+  const handleMapMouseUp = (e: MouseEvent) => {
+    if (e.button === 2) {
       setIsDragging(false);
       setDragStart(null);
       setDragOrigin(null);
-      window.removeEventListener('mousemove', handleMouseMove as any);
-      window.removeEventListener('mouseup', handleMouseUp as any);
+      window.removeEventListener('mousemove', handleMapMouseMove as any);
+      window.removeEventListener('mouseup', handleMapMouseUp as any);
     }
   };
   const handleWheel = (e: React.WheelEvent) => {
@@ -430,6 +429,7 @@ const ScenarioEditor: React.FC = () => {
     if (!mapOverlay) return;    const handleMouseMove = (moveEvent: MouseEvent) => {
       const overlayRect = mapOverlay.getBoundingClientRect();
       
+      // 마우스 위치를 맵 오버레이 기준 백분율로 변환
       // 마우스 위치를 맵 오버레이 기준 백분율로 변환
       const mouseX = moveEvent.clientX - overlayRect.left;
       const mouseY = moveEvent.clientY - overlayRect.top;
