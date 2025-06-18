@@ -208,22 +208,74 @@ body.map-active {
   border: 2px solid rgba(255, 255, 255, 0.3);
   cursor: pointer;
   pointer-events: auto;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   z-index: 10;
   user-select: none;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .player-marker:hover {
-  transform: scale(1.1);
-  border-color: rgba(255, 255, 255, 0.8);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  transform: translate(-50%, -50%) scale(1.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.7) !important;
 }
 
 .player-marker.selected {
-  border-color: #ffffff; /* 빨간색 → 흰색 */
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.6); /* 빨간색 → 흰색 글로우 효과 */
-  transform: scale(1.2);
+  transform: translate(-50%, -50%) scale(1.2);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.8) !important;
+  border-width: 4px !important;
+}
+
+.player-marker.selected::after {
+  content: '';
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 15px;
+  height: 15px;
+  background-color: #FFD700;
+  border-radius: 50%;
+  border: 2px solid white;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* 플레이어 드래그 상태 스타일 */
+.player-marker.dragging {
+  transform: translate(-50%, -50%) scale(1.1);
+  z-index: 20 !important;
+  cursor: grabbing !important;
+}
+
+.player-marker {
+  cursor: grab;
+}
+
+.player-marker:active {
+  cursor: grabbing;
+}
+
+/* 드래그 중 선택 방지 */
+.map-active {
+  user-select: none;
+  cursor: grabbing;
+}
+
+.map-active * {
+  user-select: none;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* 타임라인 섹션 */

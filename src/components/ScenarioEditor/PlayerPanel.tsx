@@ -12,9 +12,8 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
   players,
   selectedPlayerId,
   onPlayerSelect
-}) => {
-  const attackers = players.filter(p => p.team === 'attack');
-  const defenders = players.filter(p => p.team === 'defense');
+}) => {  const ourTeam = players.filter(p => p.team === 'our');
+  const enemyTeam = players.filter(p => p.team === 'enemy');
 
   const renderPlayerList = (teamPlayers: Player[], teamName: string) => (
     <div className="team-section">
@@ -43,9 +42,8 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
 
   return (
     <div className="player-panel">
-      <h2>플레이어</h2>
-      {renderPlayerList(attackers, '공격팀')}
-      {renderPlayerList(defenders, '수비팀')}
+      <h2>플레이어</h2>      {renderPlayerList(ourTeam, '아군팀')}
+      {renderPlayerList(enemyTeam, '적군팀')}
       
       {selectedPlayerId && (
         <div className="selected-player-info">

@@ -26,6 +26,11 @@ const ScenarioEditor: React.FC = () => {
   const [mapScale, setMapScale] = useState(1.2); // 초기 스케일을 1에서 1.2로 증가
   const mapContainerRef = useRef<HTMLDivElement>(null);
 
+  // 플레이어 위치 상태 관리
+  const [playerPositions, setPlayerPositions] = useState<{ [playerId: string]: { x: number, y: number } }>({});
+  const [draggedPlayer, setDraggedPlayer] = useState<string | null>(null);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+
   // 시나리오 로드
   useEffect(() => {
     if (!scenarioId) {
@@ -108,6 +113,9 @@ const ScenarioEditor: React.FC = () => {
     setSelectedAction(actionType);
   };  // 맵 드래그 이벤트 핸들러들
   const handleMouseDown = (e: React.MouseEvent) => {
+    // 플레이어를 드래그하는 중이면 맵 드래그 방지
+    if (draggedPlayer) return;
+    
     if (e.button === 1) { // 마우스 가운데 버튼 (휠 클릭)
       e.preventDefault();
       setIsDragging(true);
@@ -183,9 +191,96 @@ const ScenarioEditor: React.FC = () => {
     }
   };
   
-  const selectedPlayer = selectedPlayerId 
-    ? currentScenario?.players?.find((p: any) => p.id === selectedPlayerId) || null
+  // teams 데이터를 Player 배열로 변환하는 함수
+  const convertTeamsToPlayers = (teams: any[] = []): Player[] => {
+    return teams.map((team) => ({
+      id: team.id,
+      name: `${team.agentName} ${team.position + 1}`, // "Jett 1", "Sage 2" 형태
+      agent: team.agentName,
+      team: team.teamType as 'our' | 'enemy',
+      role: team.agentRole,
+      position: team.position,
+      color: team.teamType === 'our' ? '#4CAF50' : '#F44336' // 아군은 초록, 적군은 빨강
+    }));
+  };
+
+  // 현재 시나리오의 플레이어 목록 계산
+  const players = currentScenario ? convertTeamsToPlayers(currentScenario.teams) : [];
+  const selectedPlayer = selectedPlayerId    ? players.find(p => p.id === selectedPlayerId) || null
     : null;
+
+  // 간단한 플레이어 드래그 핸들러 (더 정확한 방식)
+  const handlePlayerMouseDownSimple = (e: React.MouseEvent, playerId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (e.button !== 0) return; // 좌클릭만 허용
+    
+    setDraggedPlayer(playerId);
+    handlePlayerSelect(playerId);
+    
+    const mapContainer = mapContainerRef.current;
+    if (!mapContainer) return;
+    
+    const mapOverlay = mapContainer.querySelector('.map-overlay') as HTMLElement;
+    if (!mapOverlay) return;
+    
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const overlayRect = mapOverlay.getBoundingClientRect();
+      
+      // 마우스 위치를 맵 오버레이 기준 백분율로 직접 변환
+      const mouseX = moveEvent.clientX - overlayRect.left;
+      const mouseY = moveEvent.clientY - overlayRect.top;
+      
+      const percentX = (mouseX / overlayRect.width) * 100;
+      const percentY = (mouseY / overlayRect.height) * 100;
+      
+      // 경계 체크
+      const clampedX = Math.max(2, Math.min(98, percentX));
+      const clampedY = Math.max(2, Math.min(98, percentY));
+      
+      setPlayerPositions(prev => ({
+        ...prev,
+        [playerId]: { x: clampedX, y: clampedY }
+      }));
+    };
+    
+    const handleMouseUp = () => {
+      setDraggedPlayer(null);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+    
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
+
+  // 플레이어 위치 계산 함수
+  const getPlayerPosition = (player: any) => {
+    // 사용자가 이동시킨 위치가 있으면 그것을 사용
+    if (playerPositions[player.id]) {
+      return playerPositions[player.id];
+    }
+    
+    // 기본 위치 계산
+    const isOurTeam = player.team === 'our';
+    const teamIndex = isOurTeam 
+      ? players.filter(p => p.team === 'our').indexOf(player)
+      : players.filter(p => p.team === 'enemy').indexOf(player);
+    
+    const baseX = isOurTeam ? 15 : 75;
+    const baseY = 20 + (teamIndex * 12);
+    
+    return { x: baseX, y: baseY };
+  };
+  // 플레이어 위치 리셋 함수
+  const resetPlayerPosition = (playerId: string) => {
+    setPlayerPositions(prev => {
+      const newPositions = { ...prev };
+      delete newPositions[playerId];
+      return newPositions;
+    });
+  };
 
   // 로딩 상태는 제거 (더미 데이터가 있으므로 항상 시나리오가 존재)
     return (
@@ -231,27 +326,65 @@ const ScenarioEditor: React.FC = () => {
                         handleMapClick({ x, y });
                       }
                     }}
-                  >
-                    {/* 플레이어 마커들이 여기에 렌더링됩니다 */}
-                    {(currentScenario.players || []).map((player: any, index: number) => (
-                      <div
-                        key={player.id}
-                        className={`player-marker ${selectedPlayerId === player.id ? 'selected' : ''}`}
-                        style={{
-                          backgroundColor: player.color,
-                          position: 'absolute',
-                          left: `${20 + (index * 15)}%`,
-                          top: `${30 + (index * 10)}%`,
-                          transform: 'translate(-50%, -50%)'
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handlePlayerSelect(player.id);
-                        }}
-                      >
-                        {player.agent.charAt(0)}
-                      </div>
-                    ))}
+                  >                    {/* 플레이어 마커들이 여기에 렌더링됩니다 */}                    {players.map((player) => {
+                      const position = getPlayerPosition(player);
+                      const teamIndex = player.team === 'our' 
+                        ? players.filter(p => p.team === 'our').indexOf(player)
+                        : players.filter(p => p.team === 'enemy').indexOf(player);
+                      
+                      const isDragging = draggedPlayer === player.id;
+                      
+                      return (
+                        <div
+                          key={player.id}
+                          className={`player-marker ${selectedPlayerId === player.id ? 'selected' : ''} ${isDragging ? 'dragging' : ''}`}
+                          style={{
+                            backgroundColor: player.color,
+                            position: 'absolute',
+                            left: `${position.x}%`,
+                            top: `${position.y}%`,
+                            transform: 'translate(-50%, -50%)',
+                            width: '45px',
+                            height: '45px',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'white',
+                            fontWeight: 'bold',
+                            fontSize: '10px',
+                            border: player.team === 'our' ? '3px solid #4CAF50' : '3px solid #F44336',
+                            cursor: isDragging ? 'grabbing' : 'grab',
+                            zIndex: isDragging ? 20 : 10,
+                            boxShadow: isDragging 
+                              ? '0 8px 16px rgba(0,0,0,0.8)' 
+                              : '0 2px 8px rgba(0,0,0,0.5)',
+                            transition: isDragging ? 'none' : 'all 0.2s ease',
+                            opacity: isDragging ? 0.9 : 1,
+                            userSelect: 'none'
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (!isDragging) {
+                              handlePlayerSelect(player.id);
+                            }
+                          }}                          onMouseDown={(e) => handlePlayerMouseDownSimple(e, player.id)}
+                          onContextMenu={(e) => {
+                            e.preventDefault();
+                            resetPlayerPosition(player.id);
+                          }}
+                          title={`${player.name} (${player.agent} - ${player.role}) - 우클릭으로 위치 리셋`}
+                        >
+                          <div style={{ fontSize: '12px', lineHeight: '1' }}>
+                            {player.agent.substring(0, 3).toUpperCase()}
+                          </div>
+                          <div style={{ fontSize: '8px', lineHeight: '1', opacity: 0.8 }}>
+                            {teamIndex + 1}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -324,7 +457,7 @@ const ScenarioEditor: React.FC = () => {
 
             <div className="panel-content">              {rightPanelMode === 'players' ? (
                 <PlayerPanel
-                  players={currentScenario.players || []}
+                  players={players}
                   selectedPlayerId={selectedPlayerId}
                   onPlayerSelect={handlePlayerSelect}
                 />
