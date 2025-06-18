@@ -162,6 +162,22 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
+.action-marker.skill-block {
+  border-radius: 8px;
+  height: 20px;
+  min-width: 24px;
+  max-height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: 6px;
+  padding-right: 6px;
+  font-size: 13px;
+  cursor: grab;
+  box-sizing: border-box;
+  opacity: 0.95;
+}
+
 .action-icon {
   font-size: 12px;
   line-height: 1;

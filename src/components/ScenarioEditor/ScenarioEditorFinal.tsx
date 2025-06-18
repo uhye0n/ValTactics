@@ -241,20 +241,26 @@ const ScenarioEditor: React.FC = () => {
   };  const handleActionSelect = (actionType: string) => {
     setSelectedAction(actionType);
   };
-
   // 플레이어 액션 기록 함수
   const recordPlayerAction = async (playerId: string, actionType: 'move' | 'skill' | 'shoot' | 'plant' | 'defuse' | 'death' | 'revive', position: { x: number; y: number }, data?: any) => {
     if (!currentScenario?.id) return;
     
     try {
-      await apiService.recordPlayerAction(currentScenario.id, {
+      const eventId = `event_${Date.now()}_${playerId}`;
+      
+      await apiService.addTimelineEvent(currentScenario.id, {
+        id: eventId,
         playerId,
         actionType,
-        timestamp: Date.now(),
+        timestamp: currentTime, // currentTime 사용 (절대시간이 아닌 타임라인 시간)
         position,
-        data
+        metadata: data
       });
-      console.log(`Recorded ${actionType} action for player ${playerId}`);
+      
+      console.log(`Recorded ${actionType} action for player ${playerId} at ${currentTime}ms`);
+      
+      // 시나리오 다시 로드하여 타임라인에 표시
+      await loadScenario(currentScenario.id);
     } catch (error) {
       console.error('Failed to record player action:', error);
     }
@@ -328,84 +334,59 @@ const ScenarioEditor: React.FC = () => {
       }));
     }
   };  const handleMapClick = (e: React.MouseEvent) => {
-    if (!selectedPlayerId || actionMode === 'select' || draggedPlayer) return;
-    
+    console.log('맵 클릭 발생', { selectedPlayerId, actionMode, draggedPlayer });
+    if (!selectedPlayerId || actionMode === 'select' || draggedPlayer) {
+      console.log('맵 클릭 무시됨: 조건 불충족', { selectedPlayerId, actionMode, draggedPlayer });
+      return;
+    }
+
     const mapContainer = mapContainerRef.current;
     if (!mapContainer) return;
-    
+
     const mapOverlay = mapContainer.querySelector('.map-overlay') as HTMLElement;
     if (!mapOverlay) return;
-    
+
     const overlayRect = mapOverlay.getBoundingClientRect();
     const clickX = e.clientX - overlayRect.left;
     const clickY = e.clientY - overlayRect.top;
-    
+
     const percentX = (clickX / overlayRect.width) * 100;
     const percentY = (clickY / overlayRect.height) * 100;
-    
+
     const clampedX = Math.max(0, Math.min(100, percentX));
     const clampedY = Math.max(0, Math.min(100, percentY));
-      if (actionMode === 'move' || actionMode === 'run') {
-      // 이동 액션 생성
-      const currentPos = getPlayerPosition(players.find(p => p.id === selectedPlayerId));
-      const newPath = {
-        x: clampedX,
-        y: clampedY,
-        time: currentTime
-      };
-      
-      // 이동 경로 추가
-      setMovementPaths(prev => ({
-        ...prev,
-        [selectedPlayerId]: [...(prev[selectedPlayerId] || []), newPath]
-      }));
-      
-      // 플레이어 위치 업데이트
+
+    // 기존 addAction 대신 recordPlayerAction 사용
+    if (actionMode === 'move' || actionMode === 'run') {
+      recordPlayerAction(selectedPlayerId, 'move', { x: clampedX, y: clampedY }, {
+        moveType: actionMode,
+        duration: actionMode === 'run' ? 2000 : 4000
+      });
       setPlayerPositions(prev => ({
         ...prev,
         [selectedPlayerId]: { x: clampedX, y: clampedY }
       }));
-        // 타임라인에 이동 액션 기록
-      recordPlayerAction(selectedPlayerId, 'move', { x: clampedX, y: clampedY }, {
-        fromX: currentPos.x,
-        fromY: currentPos.y,
-        duration: actionMode === 'run' ? 2000 : 4000, // 달리기는 2초, 걷기는 4초
-        moveType: actionMode
-      });
-      
     } else if (actionMode === 'skill') {
-      // 스킬 효과 생성
+      recordPlayerAction(selectedPlayerId, 'skill', { x: clampedX, y: clampedY }, {
+        skillType: selectedAction,
+        duration: 15000
+      });
       const skillId = Date.now().toString();
-      const skillType = selectedAction || 'skill_q'; // 기본값
-      const newSkill = {
+      setSkillEffects(prev => [...prev, {
         id: skillId,
         playerId: selectedPlayerId,
         x: clampedX,
         y: clampedY,
         startTime: currentTime,
-        duration: 15000 // 15초 지속
-      };
-      
-      setSkillEffects(prev => [...prev, newSkill]);
-      
-      // 타임라인에 스킬 액션 기록
-      recordPlayerAction(selectedPlayerId, 'skill', { x: clampedX, y: clampedY }, {
-        skillId,
-        skillType,
         duration: 15000
-      });
+      }]);
     } else if (selectedAction === 'plant') {
-      // 스파이크 설치
-      recordPlayerAction(selectedPlayerId, 'plant', { x: clampedX, y: clampedY }, {
-        duration: 4000 // 4초 소요
-      });
+      recordPlayerAction(selectedPlayerId, 'plant', { x: clampedX, y: clampedY }, { duration: 4000 });
     } else if (selectedAction === 'defuse') {
-      // 스파이크 해체
-      recordPlayerAction(selectedPlayerId, 'defuse', { x: clampedX, y: clampedY }, {
-        duration: 7000 // 7초 소요 (절반은 3.5초)
-      });    }
-    
-    // 일회성 액션(스킬, 설치, 해체)의 경우에만 액션 모드를 선택으로 되돌리기
+      recordPlayerAction(selectedPlayerId, 'defuse', { x: clampedX, y: clampedY }, { duration: 7000 });
+    }
+
+    // 일회성 액션의 경우 모드 리셋
     if (actionMode === 'skill' || selectedAction === 'plant' || selectedAction === 'defuse') {
       setActionMode('select');
       setSelectedAction(null);

@@ -7,6 +7,11 @@ interface ApiResponse<T> {
   details?: any
 }
 
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('auth_token');
+  return token ? { 'Authorization': `Bearer ${token}` } : {};
+};
+
 class ApiService {
   private token: string | null = null
 
@@ -183,39 +188,79 @@ class ApiService {
   }
 
   // 타임라인 이벤트 추가
-  async addTimelineEvent(scenarioId: string, eventData: {
+  addTimelineEvent = async (scenarioId: string, eventData: {
     id: string;
     playerId: string;
     actionType: string;
     timestamp: number;
     position: { x: number; y: number };
     metadata?: any;
-  }) {
-    return this.request(`/scenarios/${scenarioId}/events`, {
-      method: 'POST',
-      body: JSON.stringify(eventData),
-    })
-  }
+  }) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/scenarios/${scenarioId}/events`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders()
+        },
+        body: JSON.stringify(eventData)
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: 'Network error' }));
+        throw new Error(error.message || 'Failed to add timeline event');
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('API Error in addTimelineEvent:', error);
+      throw error;
+    }
+  };
 
   // 타임라인 이벤트 업데이트
-  async updateTimelineEvent(scenarioId: string, eventId: string, updates: {
-    timestamp?: number;
-    eventType?: string;
-    description?: string;
-    data?: any;
-  }) {
-    return this.request(`/scenarios/${scenarioId}/events/${eventId}`, {
-      method: 'PUT',
-      body: JSON.stringify(updates),
-    })
-  }
+  updateTimelineEvent = async (scenarioId: string, eventId: string, updates: any) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/scenarios/${scenarioId}/events/${eventId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders()
+        },
+        body: JSON.stringify(updates)
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: 'Network error' }));
+        throw new Error(error.message || 'Failed to update timeline event');
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('API Error in updateTimelineEvent:', error);
+      throw error;
+    }
+  };
 
   // 타임라인 이벤트 삭제
-  async deleteTimelineEvent(scenarioId: string, eventId: string) {
-    return this.request(`/scenarios/${scenarioId}/events/${eventId}`, {
-      method: 'DELETE',
-    })
-  }
+  deleteTimelineEvent = async (scenarioId: string, eventId: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/scenarios/${scenarioId}/events/${eventId}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: 'Network error' }));
+        throw new Error(error.message || 'Failed to delete timeline event');
+      }
+
+      return response.ok;
+    } catch (error) {
+      console.error('API Error in deleteTimelineEvent:', error);
+      throw error;
+    }
+  };
 
   async updateMapObjects(scenarioId: string, objects: Array<{
     objectType: string

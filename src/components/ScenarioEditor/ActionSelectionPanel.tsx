@@ -39,12 +39,25 @@ const ActionSelectionPanel: React.FC<ActionSelectionPanelProps> = ({
   ];
 
   const handleActionClick = (actionId: string) => {
+    // 이미 활성화된 액션을 다시 클릭하면 해제(토글)
+    if (
+      (actionId === 'move' && actionMode === 'move') ||
+      (actionId === 'run' && actionMode === 'run') ||
+      (actionId.startsWith('skill_') && actionMode === 'skill' && selectedAction === actionId)
+    ) {
+      onActionModeChange('select');
+      onActionSelect(''); // null 대신 빈 문자열로 해제
+      return;
+    }
+
     if (actionId === 'move' || actionId === 'run') {
       onActionModeChange(actionId as 'move' | 'run');
+      onActionSelect(actionId);
     } else if (actionId.startsWith('skill_')) {
       onActionModeChange('skill');
       onActionSelect(actionId);
     } else {
+      onActionModeChange('select');
       onActionSelect(actionId);
     }
   };

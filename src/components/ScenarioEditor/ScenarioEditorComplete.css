@@ -200,7 +200,7 @@ body.map-active {
   height: 200%; /* 맵 이미지와 동일한 크기로 설정 */
   max-width: 200%;
   max-height: 200%;
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 .player-marker {

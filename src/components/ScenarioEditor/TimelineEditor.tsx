@@ -60,9 +60,27 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
   const actionsByPlayer = scenario.teams?.reduce((acc, team) => {
     const events = scenario.timeline?.events?.filter(event => {
       try {
-        const eventData = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
-        return eventData?.playerId === team.id;
-      } catch {
+        // 데이터 파싱을 더 안전하게 처리
+        let eventData;
+        if (typeof event.data === 'string') {
+          try {
+            eventData = JSON.parse(event.data);
+          } catch (parseError) {
+            console.warn('Failed to parse event data:', event.data);
+            return false;
+          }
+        } else if (typeof event.data === 'object') {
+          eventData = event.data;
+        } else {
+          console.warn('Invalid event data type:', typeof event.data);
+          return false;
+        }
+        
+        // playerId 확인 (중첩된 객체 구조 고려)
+        const playerId = eventData?.playerId || eventData?.metadata?.playerId || eventData?.teamCompositionId;
+        return playerId === team.id;
+      } catch (error) {
+        console.warn('Error processing event:', error, event);
         return false;
       }
     }) || [];
@@ -172,13 +190,30 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
               </div>
                 <div className="track-content">                {actionsByPlayer[team.id]?.map(event => {
                   const position = (event.timestamp / duration) * 100;
+                  // 스킬 블록 처리
+                  const isSkill = event.eventType === 'skill';
+                  let blockWidth = undefined;
+                  let durationMs = 0;
+                  if (isSkill) {
+                    let eventData = {};
+                    if (typeof event.data === 'string') {
+                      try { eventData = JSON.parse(event.data); } catch {}
+                    } else if (typeof event.data === 'object') {
+                      eventData = event.data;
+                    }
+                    durationMs = eventData?.duration || 0;
+                    if (durationMs > 0) {
+                      blockWidth = (durationMs / duration) * 100;
+                    }
+                  }
                   return (
                     <div
                       key={event.id}
-                      className={`action-marker ${dragActionId === event.id ? 'dragging' : ''}`}
+                      className={`action-marker${isSkill && blockWidth ? ' skill-block' : ''} ${dragActionId === event.id ? 'dragging' : ''}`}
                       style={{
-                        left: `${position}%`, /* 단순화된 위치 계산 */
-                        backgroundColor: getActionColor(event.eventType || 'unknown')
+                        left: `${position}%`,
+                        width: isSkill && blockWidth ? `${blockWidth}%` : undefined,
+                        backgroundColor: getActionColor(event.eventType || 'unknown'),
                       }}
                       onMouseDown={(e) => handleActionDragStart(event.id, e)}
                       title={`${event.eventType} at ${formatTime(event.timestamp)}`}
@@ -187,6 +222,9 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
                       <div className="action-tooltip">
                         <div>{event.eventType}</div>
                         <div>{formatTime(event.timestamp)}</div>
+                        {isSkill && durationMs > 0 && (
+                          <div>지속: {Math.round(durationMs/1000)}초</div>
+                        )}
                         <button
                           className="delete-action"
                           onClick={(e) => {

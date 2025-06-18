@@ -317,7 +317,7 @@ router.post('/:id/events', async (req: any, res) => {
     console.log('타임라인 이벤트 추가:', { scenarioId, eventId, playerId, actionType, timestamp });
     
     // 시나리오의 타임라인 찾기
-    const scenario = await (prisma.scenario as any).findUnique({
+    const scenario = await prisma.scenario.findUnique({
       where: { id: scenarioId },
       include: { timeline: true }
     });
@@ -331,23 +331,24 @@ router.post('/:id/events', async (req: any, res) => {
     }
     
     // 타임라인 이벤트 생성
-    const event = await (prisma as any).timelineEvent.create({
+    const event = await prisma.timelineEvent.create({
       data: {
         id: eventId,
         timelineId: scenario.timeline.id,
         eventType: actionType,
         timestamp: timestamp,
         description: `${actionType} action`,
-        data: {
+        data: JSON.stringify({
           playerId: playerId,
           position: position,
           ...metadata
-        }
+        })
       }
     });
     
     console.log('타임라인 이벤트 추가 성공:', event.id);
-    res.status(201).json(event);  } catch (error) {
+    res.status(201).json(event);
+  } catch (error) {
     console.error('Error adding timeline event:', error);
     return res.status(500).json({ error: '타임라인 이벤트 추가에 실패했습니다.' });
   }

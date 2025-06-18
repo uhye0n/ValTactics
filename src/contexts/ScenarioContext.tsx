@@ -246,22 +246,85 @@ export const ScenarioProvider: React.FC<ScenarioProviderProps> = ({ children }) 
     setCurrentScenario(updatedScenario);
     setPlayback(prev => prev ? { ...prev, scenario: updatedScenario } : null);
   }, [currentScenario]);
-  const addAction = useCallback((action: Omit<PlayerAction, 'id'>) => {
+  const addAction = useCallback(async (action: Omit<PlayerAction, 'id'>) => {
     if (!currentScenario) return;
     
-    const newAction: PlayerAction = {
-      ...action,
-      id: `action-${Date.now()}`
-    };
-    
-    const updatedScenario = {
-      ...currentScenario,
-      actions: [...(currentScenario.actions || []), newAction].sort((a, b) => a.timestamp - b.timestamp)
-    };
-    
-    setCurrentScenario(updatedScenario);
-    setPlayback(prev => prev ? { ...prev, scenario: updatedScenario } : null);
-  }, [currentScenario]);
+    try {
+      const eventId = `event_${Date.now()}_${action.teamCompositionId}`;
+      
+      // 백엔드에 이벤트 추가 시도
+      try {
+        await apiService.addTimelineEvent(currentScenario.id, {
+          id: eventId,
+          playerId: action.teamCompositionId,
+          actionType: action.actionType,
+          timestamp: action.timestamp,
+          position: { x: action.positionX || 0, y: action.positionY || 0 },
+          metadata: {
+            targetX: action.targetX,
+            targetY: action.targetY,
+            skillId: action.skillId,
+            skillName: action.skillName,
+            data: action.data
+          }
+        });
+        
+        console.log(`Added ${action.actionType} action for player ${action.teamCompositionId} at ${action.timestamp}ms`);
+        
+        // 백엔드 성공 시 시나리오 다시 로드
+        await loadScenario(currentScenario.id);
+      } catch (backendError) {
+        console.error('Backend API failed, updating local state:', backendError);
+        
+        // 백엔드 실패 시 로컬 상태만 업데이트
+        const newAction: PlayerAction = {
+          id: eventId,
+          teamCompositionId: action.teamCompositionId,
+          timestamp: action.timestamp,
+          actionType: action.actionType,
+          positionX: action.positionX,
+          positionY: action.positionY,
+          targetX: action.targetX,
+          targetY: action.targetY,
+          skillId: action.skillId,
+          skillName: action.skillName,
+          data: action.data
+        };
+        
+        // 로컬 시나리오 상태 업데이트
+        const updatedScenario = {
+          ...currentScenario,
+          actions: [...(currentScenario.actions || []), newAction].sort((a, b) => a.timestamp - b.timestamp),
+          timeline: {
+            ...currentScenario.timeline,
+            events: [...(currentScenario.timeline?.events || []), {
+              id: eventId,
+              timestamp: action.timestamp,
+              eventType: action.actionType,
+              description: `${action.actionType} action`,
+              data: {
+                playerId: action.teamCompositionId,
+                position: { x: action.positionX || 0, y: action.positionY || 0 },
+                metadata: {
+                  targetX: action.targetX,
+                  targetY: action.targetY,
+                  skillId: action.skillId,
+                  skillName: action.skillName,
+                  data: action.data
+                }
+              }
+            }].sort((a, b) => a.timestamp - b.timestamp)
+          } as any
+        };
+        
+        setCurrentScenario(updatedScenario);
+        setPlayback(prev => prev ? { ...prev, scenario: updatedScenario } : null);
+      }
+    } catch (error) {
+      console.error('Failed to add action:', error);
+      throw error;
+    }
+  }, [currentScenario, loadScenario]);
 
   const removeAction = useCallback((actionId: string) => {
     if (!currentScenario) return;
