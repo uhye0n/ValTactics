@@ -16,10 +16,10 @@ export function Header() {
 
   const handleBackClick = () => {
     navigate('/');
-  };
-  const isNewScenarioPage = location.pathname === '/new-scenario';
-  const isScenarioEditorPage = location.pathname === '/scenario-editor';
-  const showBackNavigation = isNewScenarioPage || isScenarioEditorPage;
+  };  const isNewScenarioPage = location.pathname === '/new-scenario';
+  const isScenarioEditorPage = location.pathname === '/scenario-editor' || location.pathname.startsWith('/editor/');
+  const isMyScenarioPage = location.pathname === '/my-scenarios';
+  const showBackNavigation = isNewScenarioPage || isScenarioEditorPage || isMyScenarioPage;
 
   return (
     <header className="header">
@@ -45,9 +45,10 @@ export function Header() {
               </button>
                 <div className="breadcrumb">
                 <div className="breadcrumb-arrow" />
-                <div className="breadcrumb-arrow" />
-                <span className="breadcrumb-text">
-                  {isNewScenarioPage ? '메인화면' : isScenarioEditorPage ? '시나리오 생성' : '메인화면'}
+                <div className="breadcrumb-arrow" />                <span className="breadcrumb-text">
+                  {isNewScenarioPage ? '새 시나리오' : 
+                   isScenarioEditorPage ? '시나리오 에디터' : 
+                   isMyScenarioPage ? '내 시나리오' : '메인화면'}
                 </span>
               </div>
             </div>
